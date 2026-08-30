@@ -34,3 +34,17 @@ jobs:
           go-version: stable
           cache: false
       - run: go test -race ./...
+
+  benchmark-contracts:
+    name: Benchmark contracts and smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: benchmarks/go.mod
+          cache: false
+      - run: go test ./...
+        working-directory: benchmarks
+      - run: go test -run '^$' -bench . -benchtime=1x
+        working-directory: benchmarks
