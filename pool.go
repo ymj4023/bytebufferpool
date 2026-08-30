@@ -24,15 +24,21 @@ type block struct {
 	active  atomic.Bool
 }
 
-// Pool lends reusable byte storage under one immutable configuration.
-type Pool struct {
-	config          Config
-	sizes           []int
+type poolGeneration struct {
+	id              uint64
 	fastClasses     []*fastClass
 	boundedClasses  []*boundedClass
-	generation      atomic.Uint64
 	retainedBuffers atomic.Int64
 	retainedBytes   atomic.Int64
+}
+
+// Pool lends reusable byte storage under one immutable configuration.
+type Pool struct {
+	config     Config
+	sizes      []int
+	clearMu    sync.Mutex
+	generation atomic.Uint64
+	current    atomic.Pointer[poolGeneration]
 }
 
 // New constructs a Pool from config.
@@ -46,20 +52,32 @@ func New(config Config) (*Pool, error) {
 		config: normalized,
 		sizes:  append([]int(nil), normalized.Classes...),
 	}
-	for i, size := range normalized.Classes {
-		if normalized.Mode == Fast {
-			if pool.fastClasses == nil {
-				pool.fastClasses = make([]*fastClass, len(normalized.Classes))
-			}
-			pool.fastClasses[i] = &fastClass{size: size}
-		} else {
-			if pool.boundedClasses == nil {
-				pool.boundedClasses = make([]*boundedClass, len(normalized.Classes))
-			}
-			pool.boundedClasses[i] = &boundedClass{size: size}
+	pool.current.Store(pool.newGeneration(0))
+	return pool, nil
+}
+
+func (p *Pool) newGeneration(id uint64) *poolGeneration {
+	generation := &poolGeneration{id: id}
+	if p.config.Mode == Fast {
+		generation.fastClasses = make([]*fastClass, len(p.sizes))
+		for i, size := range p.sizes {
+			generation.fastClasses[i] = &fastClass{size: size}
+		}
+	} else {
+		generation.boundedClasses = make([]*boundedClass, len(p.sizes))
+		for i, size := range p.sizes {
+			generation.boundedClasses[i] = &boundedClass{size: size}
 		}
 	}
-	return pool, nil
+	return generation
+}
+
+// Clear discards currently idle Backing Storage and advances Pool Generation.
+func (p *Pool) Clear() {
+	p.clearMu.Lock()
+	id := p.generation.Add(1)
+	p.current.Store(p.newGeneration(id))
+	p.clearMu.Unlock()
 }
 
 // Acquire returns a Lease of size bytes and panics when size is invalid.
@@ -80,18 +98,19 @@ func (p *Pool) TryAcquire(size int) (Lease, error) {
 		return Lease{}, fmt.Errorf("%w: size %d exceeds limit %d", ErrInvalidSize, size, p.config.MaxAcquireSize)
 	}
 
+	generation := p.current.Load()
 	class := p.classForSize(size)
 	var storage *block
 	if class >= 0 {
 		if p.config.Mode == Fast {
-			entry := p.fastClasses[class]
+			entry := generation.fastClasses[class]
 			if cached := entry.pool.Get(); cached != nil {
 				storage = cached.(*block)
 			} else {
 				storage = &block{buf: make([]byte, 0, entry.size), class: class}
 			}
 		} else {
-			entry := p.boundedClasses[class]
+			entry := generation.boundedClasses[class]
 			entry.mu.Lock()
 			if last := len(entry.free) - 1; last >= 0 {
 				storage = entry.free[last]
@@ -100,8 +119,8 @@ func (p *Pool) TryAcquire(size int) (Lease, error) {
 			}
 			entry.mu.Unlock()
 			if storage != nil {
-				p.retainedBuffers.Add(-1)
-				p.retainedBytes.Add(-int64(entry.size))
+				generation.retainedBuffers.Add(-1)
+				generation.retainedBytes.Add(-int64(entry.size))
 			} else {
 				storage = &block{buf: make([]byte, 0, entry.size), class: class}
 			}
@@ -117,7 +136,7 @@ func (p *Pool) TryAcquire(size int) (Lease, error) {
 		pool:       p,
 		storage:    storage,
 		token:      token,
-		generation: p.generation.Load(),
+		generation: generation.id,
 	}, nil
 }
 
@@ -130,7 +149,11 @@ func (p *Pool) classForSize(size int) int {
 	return -1
 }
 
-func (p *Pool) release(storage *block) ReleaseStatus {
+func (p *Pool) release(storage *block, leaseGeneration uint64) ReleaseStatus {
+	generation := p.current.Load()
+	if leaseGeneration != generation.id {
+		return DroppedStale
+	}
 	if cap(storage.buf) > p.config.MaxPooledCapacity {
 		return DroppedOversize
 	}
@@ -143,25 +166,25 @@ func (p *Pool) release(storage *block) ReleaseStatus {
 
 	storage.buf = storage.buf[:0]
 	if p.config.Mode == Bounded {
-		return p.releaseBounded(storage)
+		return p.releaseBounded(generation, storage)
 	}
 
 	// Design reference: libp2p/go-buffer-pool uses size-specific sync.Pools and
 	// wrapper reuse. This clean-room implementation associates the wrapper with
 	// ownership tokens and an explicit pooling cutoff instead of copying its API.
 	// https://github.com/libp2p/go-buffer-pool
-	p.fastClasses[storage.class].pool.Put(storage)
+	generation.fastClasses[storage.class].pool.Put(storage)
 	return Retained
 }
 
-func (p *Pool) releaseBounded(storage *block) ReleaseStatus {
+func (p *Pool) releaseBounded(generation *poolGeneration, storage *block) ReleaseStatus {
 	capacity := int64(cap(storage.buf))
 	for {
-		retained := p.retainedBytes.Load()
+		retained := generation.retainedBytes.Load()
 		if retained+capacity > p.config.MaxRetainedBytes {
 			return DroppedFull
 		}
-		if p.retainedBytes.CompareAndSwap(retained, retained+capacity) {
+		if generation.retainedBytes.CompareAndSwap(retained, retained+capacity) {
 			break
 		}
 	}
@@ -170,10 +193,10 @@ func (p *Pool) releaseBounded(storage *block) ReleaseStatus {
 	// container is full. This implementation uses a global byte-capacity CAS
 	// plus per-class LIFO lists instead of copying its channel-based design.
 	// https://github.com/oxtoacart/bpool
-	entry := p.boundedClasses[storage.class]
+	entry := generation.boundedClasses[storage.class]
 	entry.mu.Lock()
 	entry.free = append(entry.free, storage)
 	entry.mu.Unlock()
-	p.retainedBuffers.Add(1)
+	generation.retainedBuffers.Add(1)
 	return Retained
 }

@@ -42,7 +42,7 @@ func (l *Lease) Release() ReleaseStatus {
 		return RejectedDuplicate
 	}
 
-	status := l.pool.release(l.storage)
+	status := l.pool.release(l.storage, l.generation)
 	l.released = true
 	return status
 }

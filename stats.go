@@ -12,9 +12,10 @@ func (p *Pool) Stats() Stats {
 	if p.config.Mode != Bounded {
 		return Stats{}
 	}
+	generation := p.current.Load()
 	return Stats{
 		RetainedAvailable: true,
-		RetainedBuffers:   p.retainedBuffers.Load(),
-		RetainedCapacity:  p.retainedBytes.Load(),
+		RetainedBuffers:   generation.retainedBuffers.Load(),
+		RetainedCapacity:  generation.retainedBytes.Load(),
 	}
 }
