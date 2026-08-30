@@ -11,6 +11,12 @@ type fastClass struct {
 	pool sync.Pool
 }
 
+type boundedClass struct {
+	size int
+	mu   sync.Mutex
+	free []*block
+}
+
 type block struct {
 	buf     []byte
 	class   int
@@ -20,9 +26,13 @@ type block struct {
 
 // Pool lends reusable byte storage under one immutable configuration.
 type Pool struct {
-	config     Config
-	classes    []*fastClass
-	generation atomic.Uint64
+	config          Config
+	sizes           []int
+	fastClasses     []*fastClass
+	boundedClasses  []*boundedClass
+	generation      atomic.Uint64
+	retainedBuffers atomic.Int64
+	retainedBytes   atomic.Int64
 }
 
 // New constructs a Pool from config.
@@ -32,10 +42,22 @@ func New(config Config) (*Pool, error) {
 		return nil, err
 	}
 
-	pool := &Pool{config: normalized}
-	pool.classes = make([]*fastClass, len(normalized.Classes))
+	pool := &Pool{
+		config: normalized,
+		sizes:  append([]int(nil), normalized.Classes...),
+	}
 	for i, size := range normalized.Classes {
-		pool.classes[i] = &fastClass{size: size}
+		if normalized.Mode == Fast {
+			if pool.fastClasses == nil {
+				pool.fastClasses = make([]*fastClass, len(normalized.Classes))
+			}
+			pool.fastClasses[i] = &fastClass{size: size}
+		} else {
+			if pool.boundedClasses == nil {
+				pool.boundedClasses = make([]*boundedClass, len(normalized.Classes))
+			}
+			pool.boundedClasses[i] = &boundedClass{size: size}
+		}
 	}
 	return pool, nil
 }
@@ -61,11 +83,28 @@ func (p *Pool) TryAcquire(size int) (Lease, error) {
 	class := p.classForSize(size)
 	var storage *block
 	if class >= 0 {
-		entry := p.classes[class]
-		if cached := entry.pool.Get(); cached != nil {
-			storage = cached.(*block)
+		if p.config.Mode == Fast {
+			entry := p.fastClasses[class]
+			if cached := entry.pool.Get(); cached != nil {
+				storage = cached.(*block)
+			} else {
+				storage = &block{buf: make([]byte, 0, entry.size), class: class}
+			}
 		} else {
-			storage = &block{buf: make([]byte, 0, entry.size), class: class}
+			entry := p.boundedClasses[class]
+			entry.mu.Lock()
+			if last := len(entry.free) - 1; last >= 0 {
+				storage = entry.free[last]
+				entry.free[last] = nil
+				entry.free = entry.free[:last]
+			}
+			entry.mu.Unlock()
+			if storage != nil {
+				p.retainedBuffers.Add(-1)
+				p.retainedBytes.Add(-int64(entry.size))
+			} else {
+				storage = &block{buf: make([]byte, 0, entry.size), class: class}
+			}
 		}
 		storage.buf = storage.buf[:size]
 	} else {
@@ -83,8 +122,8 @@ func (p *Pool) TryAcquire(size int) (Lease, error) {
 }
 
 func (p *Pool) classForSize(size int) int {
-	for i, class := range p.classes {
-		if size <= class.size {
+	for i, classSize := range p.sizes {
+		if size <= classSize {
 			return i
 		}
 	}
@@ -98,16 +137,43 @@ func (p *Pool) release(storage *block) ReleaseStatus {
 	if storage.class < 0 {
 		return DroppedInvalid
 	}
-	if storage.class >= len(p.classes) || cap(storage.buf) != p.classes[storage.class].size {
+	if storage.class >= len(p.sizes) || cap(storage.buf) != p.sizes[storage.class] {
 		return DroppedInvalid
 	}
 
 	storage.buf = storage.buf[:0]
+	if p.config.Mode == Bounded {
+		return p.releaseBounded(storage)
+	}
 
 	// Design reference: libp2p/go-buffer-pool uses size-specific sync.Pools and
 	// wrapper reuse. This clean-room implementation associates the wrapper with
 	// ownership tokens and an explicit pooling cutoff instead of copying its API.
 	// https://github.com/libp2p/go-buffer-pool
-	p.classes[storage.class].pool.Put(storage)
+	p.fastClasses[storage.class].pool.Put(storage)
+	return Retained
+}
+
+func (p *Pool) releaseBounded(storage *block) ReleaseStatus {
+	capacity := int64(cap(storage.buf))
+	for {
+		retained := p.retainedBytes.Load()
+		if retained+capacity > p.config.MaxRetainedBytes {
+			return DroppedFull
+		}
+		if p.retainedBytes.CompareAndSwap(retained, retained+capacity) {
+			break
+		}
+	}
+
+	// Design reference: oxtoacart/bpool drops releases when its bounded
+	// container is full. This implementation uses a global byte-capacity CAS
+	// plus per-class LIFO lists instead of copying its channel-based design.
+	// https://github.com/oxtoacart/bpool
+	entry := p.boundedClasses[storage.class]
+	entry.mu.Lock()
+	entry.free = append(entry.free, storage)
+	entry.mu.Unlock()
+	p.retainedBuffers.Add(1)
 	return Retained
 }
