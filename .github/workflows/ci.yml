@@ -48,3 +48,5 @@ jobs:
         working-directory: benchmarks
       - run: go test -run '^$' -bench . -benchtime=1x
         working-directory: benchmarks
+      - run: go run ./cmd/memorybench -contender all -small-size 64 -small-iterations 10 -peak-size 65536 -peak-count 2 -repeat 1
+        working-directory: benchmarks

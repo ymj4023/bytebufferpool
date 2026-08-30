@@ -31,3 +31,13 @@ go test -run '^$' -bench 'Benchmark(RawFixed|RawMixed|RawParallel|BufferFixed|Bu
 ```
 
 Record the complete Go version, GOOS/GOARCH, CPU, logical core count, GOMAXPROCS, GOGC, memory limit, project commit, and dependency versions beside every published result.
+
+## Isolated-process memory suite
+
+Build or run the memory harness with one contender per child process:
+
+```text
+go run ./cmd/memorybench -contender all -repeat 3 -profile-dir results/<environment>/profiles -output results/<environment>/memory.json
+```
+
+Each child records steady small traffic, a concurrently held peak, post-release recovery, restored small traffic, and samples after one and two explicit GC cycles. The output contains raw samples plus min/mean/max summaries across repeated isolated runs. Retained Capacity is reported only by contenders that can measure it exactly.
