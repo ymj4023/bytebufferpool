@@ -101,7 +101,7 @@ func (l *Lease) Release() ReleaseStatus
 
 A Lease is a non-copyable value. It carries Pool provenance and the Generation in which its Backing Storage was acquired. Provenance, Generation, runtime copy checks, and duplicate-release state are always enabled; they are not controlled by `ValidationEnabled`.
 
-The implementation must include a `go vet`-recognizable no-copy marker and a runtime copy check. Copying remains forbidden even though a copy made before the first runtime check cannot be perfectly distinguished without shared allocation; generation and release state must still prevent the same Backing Storage from entering the Pool twice.
+The implementation uses a runtime copy check. A `go vet` no-copy lock marker is deliberately omitted because Lease is returned by value and the copylocks analyzer would flag every valid constructor return. Copying remains forbidden even though a copy made before the first runtime check cannot be perfectly distinguished by the receiver address; the shared storage token and release state must still prevent the same Backing Storage from entering the Pool twice.
 
 The first `Release` transfers ownership and returns a ReleaseStatus. A repeated `Release` returns `RejectedDuplicate` and does not re-enter storage. Calls other than `Release` after release panic.
 
