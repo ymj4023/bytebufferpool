@@ -1,0 +1,33 @@
+# Go build and test artifacts
+/bin/
+/dist/
+*.exe
+*.exe~
+*.test
+/coverage/
+/coverage.out
+
+# Local multi-module workspace
+/go.work
+/go.work.sum
+
+# Local scratch space
+/.tmp/
+/tmp/
+/.scratch/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Editors and operating systems
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Benchmark results and profiles under benchmarks/results are intentionally tracked.
