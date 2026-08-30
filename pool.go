@@ -34,11 +34,14 @@ type poolGeneration struct {
 
 // Pool lends reusable byte storage under one immutable configuration.
 type Pool struct {
-	config     Config
-	sizes      []int
-	clearMu    sync.Mutex
-	generation atomic.Uint64
-	current    atomic.Pointer[poolGeneration]
+	config       Config
+	sizes        []int
+	clearMu      sync.Mutex
+	generation   atomic.Uint64
+	current      atomic.Pointer[poolGeneration]
+	rawWrappers  sync.Pool
+	validationMu sync.Mutex
+	rawRecords   map[uintptr]rawRecord
 }
 
 // New constructs a Pool from config.
@@ -51,6 +54,9 @@ func New(config Config) (*Pool, error) {
 	pool := &Pool{
 		config: normalized,
 		sizes:  append([]int(nil), normalized.Classes...),
+	}
+	if normalized.ValidationEnabled {
+		pool.rawRecords = make(map[uintptr]rawRecord)
 	}
 	pool.current.Store(pool.newGeneration(0))
 	return pool, nil
@@ -91,13 +97,32 @@ func (p *Pool) Acquire(size int) Lease {
 
 // TryAcquire returns a Lease of size bytes.
 func (p *Pool) TryAcquire(size int) (Lease, error) {
-	if size < 0 {
-		return Lease{}, fmt.Errorf("%w: negative size %d", ErrInvalidSize, size)
-	}
-	if p.config.MaxAcquireSize > 0 && size > p.config.MaxAcquireSize {
-		return Lease{}, fmt.Errorf("%w: size %d exceeds limit %d", ErrInvalidSize, size, p.config.MaxAcquireSize)
+	if err := p.validateSize(size); err != nil {
+		return Lease{}, err
 	}
 
+	storage, generation := p.acquireStorage(size)
+	token := storage.leaseID.Add(1)
+	storage.active.Store(true)
+	return Lease{
+		pool:       p,
+		storage:    storage,
+		token:      token,
+		generation: generation.id,
+	}, nil
+}
+
+func (p *Pool) validateSize(size int) error {
+	if size < 0 {
+		return fmt.Errorf("%w: negative size %d", ErrInvalidSize, size)
+	}
+	if p.config.MaxAcquireSize > 0 && size > p.config.MaxAcquireSize {
+		return fmt.Errorf("%w: size %d exceeds limit %d", ErrInvalidSize, size, p.config.MaxAcquireSize)
+	}
+	return nil
+}
+
+func (p *Pool) acquireStorage(size int) (*block, *poolGeneration) {
 	generation := p.current.Load()
 	class := p.classForSize(size)
 	var storage *block
@@ -129,20 +154,21 @@ func (p *Pool) TryAcquire(size int) (Lease, error) {
 	} else {
 		storage = &block{buf: make([]byte, size), class: -1}
 	}
-
-	token := storage.leaseID.Add(1)
-	storage.active.Store(true)
-	return Lease{
-		pool:       p,
-		storage:    storage,
-		token:      token,
-		generation: generation.id,
-	}, nil
+	return storage, generation
 }
 
 func (p *Pool) classForSize(size int) int {
 	for i, classSize := range p.sizes {
 		if size <= classSize {
+			return i
+		}
+	}
+	return -1
+}
+
+func (p *Pool) classForCapacity(capacity int) int {
+	for i, classSize := range p.sizes {
+		if capacity == classSize {
 			return i
 		}
 	}
