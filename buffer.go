@@ -132,11 +132,11 @@ func (b *Buffer) WriteString(value string) (int, error) {
 func (b *Buffer) Release() ReleaseStatus {
 	b.checkCopy()
 	if b.released {
-		return RejectedDuplicate
+		return b.pool.recordRelease(RejectedDuplicate, -1)
 	}
 	b.released = true
 	if b.lease.storage == nil {
-		return IgnoredNil
+		return b.pool.recordRelease(IgnoredNil, -1)
 	}
 	return b.lease.Release()
 }

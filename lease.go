@@ -35,13 +35,17 @@ func (l *Lease) Cap() int {
 func (l *Lease) Release() ReleaseStatus {
 	l.checkCopy()
 	if l.released || l.storage == nil {
+		if l.pool != nil {
+			return l.pool.recordRelease(RejectedDuplicate, -1)
+		}
 		return RejectedDuplicate
 	}
 	if l.storage.leaseID.Load() != l.token || !l.storage.active.CompareAndSwap(true, false) {
 		l.released = true
-		return RejectedDuplicate
+		return l.pool.recordRelease(RejectedDuplicate, l.storage.class)
 	}
 
+	l.pool.prepareLeaseRelease(l.storage.buf)
 	status := l.pool.release(l.storage, l.generation)
 	l.released = true
 	return status

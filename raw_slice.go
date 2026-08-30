@@ -47,19 +47,19 @@ func (p *Pool) TryAcquireSlice(size int) ([]byte, error) {
 // eliminate the ABA ambiguity created by mutable slice aliases.
 func (p *Pool) ReleaseSlice(buffer []byte) ReleaseStatus {
 	if buffer == nil {
-		return IgnoredNil
+		return p.recordRelease(IgnoredNil, -1)
 	}
 
 	if p.config.ValidationEnabled {
 		status, proceed, owned := p.validateRawRelease(buffer)
 		if !proceed {
 			if owned {
-				fillReleased(buffer)
+				p.prepareRawRelease(buffer)
 			}
-			return status
+			return p.recordRelease(status, -1)
 		}
-		fillReleased(buffer)
 	}
+	p.prepareRawRelease(buffer)
 
 	capacity := cap(buffer)
 	if capacity > p.config.MaxPooledCapacity {
@@ -126,9 +126,16 @@ func rawKey(buffer []byte) uintptr {
 	return uintptr(unsafe.Pointer(unsafe.SliceData(buffer)))
 }
 
-func fillReleased(buffer []byte) {
-	clearable := buffer[:cap(buffer)]
-	for i := range clearable {
-		clearable[i] = releasedDiagnosticByte
+func (p *Pool) prepareRawRelease(buffer []byte) {
+	full := buffer[:cap(buffer)]
+	if p.config.ZeroOnRelease {
+		clear(full)
+		p.recordZeroed(len(full))
+		return
+	}
+	if p.config.ValidationEnabled {
+		for i := range full {
+			full[i] = releasedDiagnosticByte
+		}
 	}
 }

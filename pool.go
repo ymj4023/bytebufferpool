@@ -42,6 +42,7 @@ type Pool struct {
 	rawWrappers  sync.Pool
 	validationMu sync.Mutex
 	rawRecords   map[uintptr]rawRecord
+	counters     *poolCounters
 }
 
 // New constructs a Pool from config.
@@ -57,6 +58,9 @@ func New(config Config) (*Pool, error) {
 	}
 	if normalized.ValidationEnabled {
 		pool.rawRecords = make(map[uintptr]rawRecord)
+	}
+	if normalized.StatsEnabled {
+		pool.counters = newPoolCounters(normalized.Classes)
 	}
 	pool.current.Store(pool.newGeneration(0))
 	return pool, nil
@@ -126,11 +130,13 @@ func (p *Pool) acquireStorage(size int) (*block, *poolGeneration) {
 	generation := p.current.Load()
 	class := p.classForSize(size)
 	var storage *block
+	hit := false
 	if class >= 0 {
 		if p.config.Mode == Fast {
 			entry := generation.fastClasses[class]
 			if cached := entry.pool.Get(); cached != nil {
 				storage = cached.(*block)
+				hit = true
 			} else {
 				storage = &block{buf: make([]byte, 0, entry.size), class: class}
 			}
@@ -144,6 +150,7 @@ func (p *Pool) acquireStorage(size int) (*block, *poolGeneration) {
 			}
 			entry.mu.Unlock()
 			if storage != nil {
+				hit = true
 				generation.retainedBuffers.Add(-1)
 				generation.retainedBytes.Add(-int64(entry.size))
 			} else {
@@ -154,6 +161,7 @@ func (p *Pool) acquireStorage(size int) (*block, *poolGeneration) {
 	} else {
 		storage = &block{buf: make([]byte, size), class: -1}
 	}
+	p.recordAcquire(class, hit)
 	return storage, generation
 }
 
@@ -178,21 +186,21 @@ func (p *Pool) classForCapacity(capacity int) int {
 func (p *Pool) release(storage *block, leaseGeneration uint64) ReleaseStatus {
 	generation := p.current.Load()
 	if leaseGeneration != generation.id {
-		return DroppedStale
+		return p.recordRelease(DroppedStale, storage.class)
 	}
 	if cap(storage.buf) > p.config.MaxPooledCapacity {
-		return DroppedOversize
+		return p.recordRelease(DroppedOversize, storage.class)
 	}
 	if storage.class < 0 {
-		return DroppedInvalid
+		return p.recordRelease(DroppedInvalid, storage.class)
 	}
 	if storage.class >= len(p.sizes) || cap(storage.buf) != p.sizes[storage.class] {
-		return DroppedInvalid
+		return p.recordRelease(DroppedInvalid, storage.class)
 	}
 
 	storage.buf = storage.buf[:0]
 	if p.config.Mode == Bounded {
-		return p.releaseBounded(generation, storage)
+		return p.recordRelease(p.releaseBounded(generation, storage), storage.class)
 	}
 
 	// Design reference: libp2p/go-buffer-pool uses size-specific sync.Pools and
@@ -200,7 +208,7 @@ func (p *Pool) release(storage *block, leaseGeneration uint64) ReleaseStatus {
 	// ownership tokens and an explicit pooling cutoff instead of copying its API.
 	// https://github.com/libp2p/go-buffer-pool
 	generation.fastClasses[storage.class].pool.Put(storage)
-	return Retained
+	return p.recordRelease(Retained, storage.class)
 }
 
 func (p *Pool) releaseBounded(generation *poolGeneration, storage *block) ReleaseStatus {
