@@ -1,6 +1,6 @@
 module github.com/ymj4023/bytebufferpool/benchmarks
 
-go 1.25.8
+go 1.26.0
 
 require (
 	github.com/libp2p/go-buffer-pool v0.1.0
@@ -11,6 +11,12 @@ require (
 	google.golang.org/grpc v1.83.2
 )
 
-require golang.org/x/sys v0.47.0 // indirect
+require (
+	github.com/aclements/go-moremath v0.0.0-20210112150236-f10218a38794 // indirect
+	golang.org/x/perf v0.0.0-20260825160852-19be9d8e6c70 // indirect
+	golang.org/x/sys v0.47.0 // indirect
+)
 
 replace github.com/ymj4023/bytebufferpool => ..
+
+tool golang.org/x/perf/cmd/benchstat
