@@ -15,11 +15,11 @@ func FuzzPoolConfiguration(f *testing.F) {
 	f.Fuzz(func(t *testing.T, mode uint8, first, second, cutoff int, budget int64, acquireLimit int) {
 		classes := []int{first, second}
 		pool, err := bytebufferpool.New(bytebufferpool.Config{
-			Mode:              bytebufferpool.Mode(mode),
-			Classes:           classes,
-			MaxPooledCapacity: cutoff,
-			MaxRetainedBytes:  budget,
-			MaxAcquireSize:    acquireLimit,
+			Mode:                bytebufferpool.Mode(mode),
+			Classes:             classes,
+			MaxPooledCapacity:   cutoff,
+			MaxRetainedCapacity: budget,
+			MaxAcquireSize:      acquireLimit,
 		})
 		if err != nil {
 			return

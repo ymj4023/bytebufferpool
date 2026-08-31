@@ -15,7 +15,7 @@ func TestRawSliceSharesCapacityContractAcrossBackends(t *testing.T) {
 			MaxPooledCapacity: 128,
 		}
 		if mode == bytebufferpool.Bounded {
-			config.MaxRetainedBytes = 256
+			config.MaxRetainedCapacity = 256
 		}
 
 		pool, err := bytebufferpool.New(config)

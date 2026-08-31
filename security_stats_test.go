@@ -8,13 +8,13 @@ import (
 
 func TestZeroOnReleaseClearsFullCapacityAcrossAPIs(t *testing.T) {
 	pool, err := bytebufferpool.New(bytebufferpool.Config{
-		Mode:              bytebufferpool.Bounded,
-		Classes:           []int{64, 128},
-		MaxPooledCapacity: 128,
-		MaxRetainedBytes:  512,
-		ZeroOnRelease:     true,
-		ValidationEnabled: true,
-		StatsEnabled:      true,
+		Mode:                bytebufferpool.Bounded,
+		Classes:             []int{64, 128},
+		MaxPooledCapacity:   128,
+		MaxRetainedCapacity: 512,
+		ZeroOnRelease:       true,
+		ValidationEnabled:   true,
+		StatsEnabled:        true,
 	})
 	if err != nil {
 		t.Fatalf("New(): %v", err)
@@ -90,13 +90,35 @@ func TestZeroOnReleaseDoesNotModifyRejectedStorage(t *testing.T) {
 	}
 }
 
+func TestZeroOnReleaseClearsOriginalCapacityAfterRawReslice(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:              bytebufferpool.Fast,
+		Classes:           []int{64, 128},
+		MaxPooledCapacity: 128,
+		ZeroOnRelease:     true,
+		ValidationEnabled: true,
+	})
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+
+	original := pool.AcquireSlice(65)
+	full := original[:cap(original)]
+	fillBytes(full, 0x77)
+	shortCapacity := original[:64:64]
+	if got := pool.ReleaseSlice(shortCapacity); got != bytebufferpool.DroppedInvalid {
+		t.Fatalf("ReleaseSlice(short capacity) = %v; want DroppedInvalid", got)
+	}
+	assertAllZero(t, "resliced Raw Slice", full)
+}
+
 func TestOptionalStatsReportDeterministicBoundedOperations(t *testing.T) {
 	pool, err := bytebufferpool.New(bytebufferpool.Config{
-		Mode:              bytebufferpool.Bounded,
-		Classes:           []int{64},
-		MaxPooledCapacity: 64,
-		MaxRetainedBytes:  64,
-		StatsEnabled:      true,
+		Mode:                bytebufferpool.Bounded,
+		Classes:             []int{64},
+		MaxPooledCapacity:   64,
+		MaxRetainedCapacity: 64,
+		StatsEnabled:        true,
 	})
 	if err != nil {
 		t.Fatalf("New(): %v", err)
@@ -132,11 +154,11 @@ func TestOptionalStatsReportDeterministicBoundedOperations(t *testing.T) {
 
 func TestOptionalStatsStayDisabledWithoutLosingBoundedInventory(t *testing.T) {
 	pool, err := bytebufferpool.New(bytebufferpool.Config{
-		Mode:              bytebufferpool.Bounded,
-		Classes:           []int{64},
-		MaxPooledCapacity: 64,
-		MaxRetainedBytes:  64,
-		StatsEnabled:      false,
+		Mode:                bytebufferpool.Bounded,
+		Classes:             []int{64},
+		MaxPooledCapacity:   64,
+		MaxRetainedCapacity: 64,
+		StatsEnabled:        false,
 	})
 	if err != nil {
 		t.Fatalf("New(): %v", err)
@@ -150,6 +172,38 @@ func TestOptionalStatsStayDisabledWithoutLosingBoundedInventory(t *testing.T) {
 	}
 	if !stats.RetainedAvailable || stats.RetainedBuffers != 1 || stats.RetainedCapacity != 64 {
 		t.Fatalf("mandatory Bounded inventory lost when counters disabled: %+v", stats)
+	}
+}
+
+func TestRawSliceRecordsZeroOversizeAndInvalidOperations(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:              bytebufferpool.Fast,
+		Classes:           []int{64},
+		MaxPooledCapacity: 64,
+		MaxAcquireSize:    128,
+		StatsEnabled:      true,
+	})
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+
+	if got := pool.AcquireSlice(0); got != nil {
+		t.Fatalf("AcquireSlice(0) = %#v; want nil", got)
+	}
+	oversize := pool.AcquireSlice(65)
+	if got := pool.ReleaseSlice(oversize); got != bytebufferpool.DroppedOversize {
+		t.Fatalf("oversize ReleaseSlice() = %v; want DroppedOversize", got)
+	}
+	if got := pool.ReleaseSlice(make([]byte, 32)); got != bytebufferpool.DroppedInvalid {
+		t.Fatalf("invalid ReleaseSlice() = %v; want DroppedInvalid", got)
+	}
+
+	stats := pool.Stats()
+	if stats.Acquires != 2 || stats.Misses != 2 {
+		t.Fatalf("Raw acquire counters = %d/%d misses; want 2/2", stats.Acquires, stats.Misses)
+	}
+	if stats.Releases != 2 || stats.DroppedOversize != 1 || stats.DroppedInvalid != 1 {
+		t.Fatalf("Raw release counters = %d releases, oversize %d, invalid %d; want 2/1/1", stats.Releases, stats.DroppedOversize, stats.DroppedInvalid)
 	}
 }
 

@@ -190,3 +190,57 @@ func TestLeaseCopyCannotReleaseBackingStorageTwice(t *testing.T) {
 		copied.Len()
 	})
 }
+
+func TestPoolRejectsEveryInvalidConfigurationShape(t *testing.T) {
+	tests := []struct {
+		name   string
+		config bytebufferpool.Config
+	}{
+		{name: "unsupported Mode", config: bytebufferpool.Config{Mode: bytebufferpool.Mode(99)}},
+		{name: "negative cutoff", config: bytebufferpool.Config{Mode: bytebufferpool.Fast, MaxPooledCapacity: -1}},
+		{name: "negative acquisition limit", config: bytebufferpool.Config{Mode: bytebufferpool.Fast, MaxAcquireSize: -1}},
+		{name: "limit below cutoff", config: bytebufferpool.Config{Mode: bytebufferpool.Fast, Classes: []int{64}, MaxPooledCapacity: 64, MaxAcquireSize: 32}},
+		{name: "Fast retained budget", config: bytebufferpool.Config{Mode: bytebufferpool.Fast, MaxRetainedCapacity: 1}},
+		{name: "Bounded missing budget", config: bytebufferpool.Config{Mode: bytebufferpool.Bounded}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if _, err := bytebufferpool.New(test.config); !errors.Is(err, bytebufferpool.ErrInvalidConfig) {
+				t.Fatalf("New() error = %v; want ErrInvalidConfig", err)
+			}
+		})
+	}
+}
+
+func TestDefaultPoolRoutesEveryCapacityClassBoundary(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.DefaultConfig(bytebufferpool.Fast))
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+	for capacity := 64; capacity <= 1<<20; capacity <<= 1 {
+		for _, size := range []int{capacity - 1, capacity} {
+			lease := pool.Acquire(size)
+			if got := lease.Cap(); got != capacity {
+				t.Fatalf("Acquire(%d) cap = %d; want Capacity Class %d", size, got, capacity)
+			}
+			if got := lease.Release(); got != bytebufferpool.Retained {
+				t.Fatalf("Release(%d) = %v; want Retained", size, got)
+			}
+		}
+		if capacity < 1<<20 {
+			lease := pool.Acquire(capacity + 1)
+			if got := lease.Cap(); got != capacity<<1 {
+				t.Fatalf("Acquire(%d) cap = %d; want next Capacity Class %d", capacity+1, got, capacity<<1)
+			}
+			lease.Release()
+		}
+	}
+
+	oversize := pool.Acquire((1 << 20) + 1)
+	if got := oversize.Cap(); got != (1<<20)+1 {
+		t.Fatalf("oversize cap = %d; want exact %d", got, (1<<20)+1)
+	}
+	if got := oversize.Release(); got != bytebufferpool.DroppedOversize {
+		t.Fatalf("oversize Release() = %v; want DroppedOversize", got)
+	}
+}

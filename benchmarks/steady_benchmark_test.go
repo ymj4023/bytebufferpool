@@ -2,10 +2,14 @@ package benchmarks
 
 import (
 	"fmt"
+	"runtime"
+	"sync/atomic"
 	"testing"
+
+	bytebufferpool "github.com/ymj4023/bytebufferpool"
 )
 
-var benchmarkSink byte
+var benchmarkSink atomic.Uint64
 
 func BenchmarkRawFixed(b *testing.B) {
 	for _, size := range []int{64, 1024, 16 << 10, 64 << 10, 1 << 20} {
@@ -95,6 +99,76 @@ func BenchmarkBufferParallel(b *testing.B) {
 	}
 }
 
+func BenchmarkRawLifecycle(b *testing.B) {
+	const size = 1024
+	b.Run("Cold/Project/Fast/Raw", func(b *testing.B) {
+		b.ReportAllocs()
+		b.SetBytes(size)
+		for i := 0; i < b.N; i++ {
+			b.StopTimer()
+			pool := mustPool(bytebufferpool.DefaultConfig(bytebufferpool.Fast))
+			b.StartTimer()
+			buffer := pool.AcquireSlice(size)
+			touchRaw(buffer)
+			pool.ReleaseSlice(buffer)
+		}
+	})
+
+	b.Run("Warm/Project/Fast/Raw", func(b *testing.B) {
+		pool := mustPool(bytebufferpool.DefaultConfig(bytebufferpool.Fast))
+		seed := pool.AcquireSlice(size)
+		pool.ReleaseSlice(seed)
+		b.ReportAllocs()
+		b.SetBytes(size)
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			buffer := pool.AcquireSlice(size)
+			touchRaw(buffer)
+			pool.ReleaseSlice(buffer)
+		}
+	})
+
+	b.Run("PostGC/Project/Fast/Raw", func(b *testing.B) {
+		pool := mustPool(bytebufferpool.DefaultConfig(bytebufferpool.Fast))
+		b.ReportAllocs()
+		b.SetBytes(size)
+		for i := 0; i < b.N; i++ {
+			b.StopTimer()
+			seed := pool.AcquireSlice(size)
+			pool.ReleaseSlice(seed)
+			runtime.GC()
+			b.StartTimer()
+			buffer := pool.AcquireSlice(size)
+			touchRaw(buffer)
+			pool.ReleaseSlice(buffer)
+		}
+	})
+}
+
+func BenchmarkBoundedBudgetExhaustion(b *testing.B) {
+	const capacity = 64
+	b.ReportAllocs()
+	b.SetBytes(2 * capacity)
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		pool := mustPool(bytebufferpool.Config{
+			Mode:                bytebufferpool.Bounded,
+			Classes:             []int{capacity},
+			MaxPooledCapacity:   capacity,
+			MaxRetainedCapacity: capacity,
+		})
+		first := pool.Acquire(capacity)
+		second := pool.Acquire(capacity)
+		b.StartTimer()
+		firstStatus := first.Release()
+		secondStatus := second.Release()
+		b.StopTimer()
+		if firstStatus != bytebufferpool.Retained || secondStatus != bytebufferpool.DroppedFull {
+			b.Fatalf("Release statuses = %v/%v; want Retained/DroppedFull", firstStatus, secondStatus)
+		}
+	}
+}
+
 func benchmarkRawSize(b *testing.B, adapter rawAdapter, size int) {
 	b.Helper()
 	b.ReportAllocs()
@@ -129,7 +203,7 @@ func touchRaw(buffer []byte) {
 	}
 	buffer[0]++
 	buffer[len(buffer)-1]++
-	benchmarkSink ^= buffer[0] ^ buffer[len(buffer)-1]
+	benchmarkSink.Add(uint64(buffer[0] ^ buffer[len(buffer)-1]))
 }
 
 func capacityBoundaries() []int {

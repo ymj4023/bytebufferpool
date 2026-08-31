@@ -16,7 +16,7 @@ func TestBufferWritesAndResetsAcrossBackends(t *testing.T) {
 			MaxPooledCapacity: 128,
 		}
 		if mode == bytebufferpool.Bounded {
-			config.MaxRetainedBytes = 256
+			config.MaxRetainedCapacity = 256
 		}
 		pool, err := bytebufferpool.New(config)
 		if err != nil {
@@ -52,10 +52,10 @@ func TestBufferWritesAndResetsAcrossBackends(t *testing.T) {
 
 func TestBufferGrowthReleasesOldLease(t *testing.T) {
 	pool, err := bytebufferpool.New(bytebufferpool.Config{
-		Mode:              bytebufferpool.Bounded,
-		Classes:           []int{64, 128},
-		MaxPooledCapacity: 128,
-		MaxRetainedBytes:  256,
+		Mode:                bytebufferpool.Bounded,
+		Classes:             []int{64, 128},
+		MaxPooledCapacity:   128,
+		MaxRetainedCapacity: 256,
 	})
 	if err != nil {
 		t.Fatalf("New(): %v", err)
@@ -155,10 +155,29 @@ func TestEmptyBufferDoesNotAllocateAndInvalidCapacityIsRejected(t *testing.T) {
 	if err := buffer.Grow(0); err != nil {
 		t.Fatalf("Grow(0): %v", err)
 	}
-	if buffer.Len() != 0 || buffer.Cap() != 0 || buffer.Bytes() != nil {
-		t.Fatalf("empty Buffer allocated storage: len=%d cap=%d bytes=%#v", buffer.Len(), buffer.Cap(), buffer.Bytes())
+	if buffer.Len() != 0 || buffer.Cap() != 64 || buffer.Bytes() == nil {
+		t.Fatalf("empty Buffer Lease = len=%d cap=%d bytes=%#v; want len 0/cap 64/non-nil", buffer.Len(), buffer.Cap(), buffer.Bytes())
 	}
-	if got := buffer.Release(); got != bytebufferpool.IgnoredNil {
-		t.Fatalf("empty Buffer Release() = %v; want IgnoredNil", got)
+	if got := buffer.Release(); got != bytebufferpool.Retained {
+		t.Fatalf("empty Buffer Release() = %v; want Retained", got)
 	}
+}
+
+func TestBufferCopyBeforeFirstUseCannotOutliveOriginal(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.DefaultConfig(bytebufferpool.Fast))
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+	original := pool.Buffer(64)
+	copied := original
+	if got := original.Release(); got != bytebufferpool.Retained {
+		t.Fatalf("original Release() = %v; want Retained", got)
+	}
+
+	defer func() {
+		if recover() == nil {
+			t.Fatal("Buffer copied before first use wrote after original Release")
+		}
+	}()
+	_ = copied.WriteByte(0x2a)
 }

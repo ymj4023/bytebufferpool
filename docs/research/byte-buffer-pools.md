@@ -163,7 +163,7 @@ b := lease.Bytes() // len == size；归还后不再有效
 - `Acquire(n)` 选择第一个 `class >= n`；`Release` 基于 capacity 路由。
 - 对非标准 capacity，要么只在浪费比例可接受时放入较小等级，要么直接丢弃；不能把可能小于下一次请求的对象放入较大 bucket。
 - `MaxPooledCapacity` 以上的请求允许正常分配，但 lease 标记为 unpooled，Release 直接丢弃。
-- 若提供 hard `MaxRetainedBytes`，实现必须自己管理有界 freelist；仅靠 `sync.Pool` 不能兑现这个契约。
+- 若提供 hard `MaxRetainedCapacity`，实现必须自己管理有界 freelist；仅靠 `sync.Pool` 不能兑现这个契约。
 
 不建议默认自适应。若未来增加 adaptive mode，应是显式 option，并暴露当前等级、样本窗口、阈值和重置方法；它还必须有 deterministic tests 和单独 Benchmark，不能改变默认性能的可复现性。
 
@@ -172,7 +172,7 @@ b := lease.Bytes() // len == size；归还后不再有效
 API 和文档应区分：
 
 1. `MaxPooledCapacity`：单个 buffer 超过它就不保留。
-2. `MaxRetainedBytes`：池中所有空闲 buffer 的硬预算。
+2. `MaxRetainedCapacity`：池中所有空闲 buffer 的硬预算。
 3. `MaxAcquireSize`：单次请求的业务保护；超过时返回 error，而不是尝试分配。
 
 `valyala` 只有动态的第一类近似阈值，`bpool` 只有按对象数的第二类近似。把三者混成一个 `max` 会导致用户误解 OOM 行为。
@@ -308,7 +308,7 @@ benchstat old.txt new.txt
 - `MaxPooledCapacity`，超大对象归还即 drop；
 - dirty 与 zeroing 两种清晰模式；
 - 防双重归还和跨池归还的 lease/provenance 机制，严格模式可配置；
-- 如果选择有界后端，再提供 `MaxRetainedBytes` 和精确 stats；如果选择 `sync.Pool` 后端，就不承诺硬预算；
+- 如果选择有界后端，再提供 `MaxRetainedCapacity` 和精确 stats；如果选择 `sync.Pool` 后端，就不承诺硬预算；
 - raw `[]byte` 和 writer benchmark 分组；
 - 暂不做自校准、finalizer 自动归还、复杂 writer 兼容层或背景清理 goroutine。
 

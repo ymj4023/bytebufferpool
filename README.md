@@ -79,7 +79,7 @@ if err != nil {
 config := bytebufferpool.DefaultConfig(bytebufferpool.Bounded)
 config.Classes = classes
 config.MaxPooledCapacity = 1 << 20
-config.MaxRetainedBytes = 32 << 20
+config.MaxRetainedCapacity = 32 << 20
 config.MaxAcquireSize = 64 << 20
 
 pool, err := bytebufferpool.New(config)

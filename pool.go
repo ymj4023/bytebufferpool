@@ -14,10 +14,10 @@ type fastClass struct {
 type boundedClass struct {
 	size int
 	mu   sync.Mutex
-	free []*block
+	idle []*backingStorage
 }
 
-type block struct {
+type backingStorage struct {
 	buf     []byte
 	class   int
 	leaseID atomic.Uint64
@@ -25,11 +25,11 @@ type block struct {
 }
 
 type poolGeneration struct {
-	id              uint64
-	fastClasses     []*fastClass
-	boundedClasses  []*boundedClass
-	retainedBuffers atomic.Int64
-	retainedBytes   atomic.Int64
+	id               uint64
+	fastClasses      []*fastClass
+	boundedClasses   []*boundedClass
+	retainedBuffers  atomic.Int64
+	retainedCapacity atomic.Int64
 }
 
 // Pool lends reusable byte storage under one immutable configuration.
@@ -126,40 +126,40 @@ func (p *Pool) validateSize(size int) error {
 	return nil
 }
 
-func (p *Pool) acquireStorage(size int) (*block, *poolGeneration) {
+func (p *Pool) acquireStorage(size int) (*backingStorage, *poolGeneration) {
 	generation := p.current.Load()
 	class := p.classForSize(size)
-	var storage *block
+	var storage *backingStorage
 	hit := false
 	if class >= 0 {
 		if p.config.Mode == Fast {
 			entry := generation.fastClasses[class]
 			if cached := entry.pool.Get(); cached != nil {
-				storage = cached.(*block)
+				storage = cached.(*backingStorage)
 				hit = true
 			} else {
-				storage = &block{buf: make([]byte, 0, entry.size), class: class}
+				storage = &backingStorage{buf: make([]byte, 0, entry.size), class: class}
 			}
 		} else {
 			entry := generation.boundedClasses[class]
 			entry.mu.Lock()
-			if last := len(entry.free) - 1; last >= 0 {
-				storage = entry.free[last]
-				entry.free[last] = nil
-				entry.free = entry.free[:last]
+			if last := len(entry.idle) - 1; last >= 0 {
+				storage = entry.idle[last]
+				entry.idle[last] = nil
+				entry.idle = entry.idle[:last]
 			}
 			entry.mu.Unlock()
 			if storage != nil {
 				hit = true
 				generation.retainedBuffers.Add(-1)
-				generation.retainedBytes.Add(-int64(entry.size))
+				generation.retainedCapacity.Add(-int64(entry.size))
 			} else {
-				storage = &block{buf: make([]byte, 0, entry.size), class: class}
+				storage = &backingStorage{buf: make([]byte, 0, entry.size), class: class}
 			}
 		}
 		storage.buf = storage.buf[:size]
 	} else {
-		storage = &block{buf: make([]byte, size), class: -1}
+		storage = &backingStorage{buf: make([]byte, size), class: -1}
 	}
 	p.recordAcquire(class, hit)
 	return storage, generation
@@ -183,7 +183,7 @@ func (p *Pool) classForCapacity(capacity int) int {
 	return -1
 }
 
-func (p *Pool) release(storage *block, leaseGeneration uint64) ReleaseStatus {
+func (p *Pool) release(storage *backingStorage, leaseGeneration uint64) ReleaseStatus {
 	generation := p.current.Load()
 	if leaseGeneration != generation.id {
 		return p.recordRelease(DroppedStale, storage.class)
@@ -211,14 +211,14 @@ func (p *Pool) release(storage *block, leaseGeneration uint64) ReleaseStatus {
 	return p.recordRelease(Retained, storage.class)
 }
 
-func (p *Pool) releaseBounded(generation *poolGeneration, storage *block) ReleaseStatus {
+func (p *Pool) releaseBounded(generation *poolGeneration, storage *backingStorage) ReleaseStatus {
 	capacity := int64(cap(storage.buf))
 	for {
-		retained := generation.retainedBytes.Load()
-		if retained+capacity > p.config.MaxRetainedBytes {
+		retained := generation.retainedCapacity.Load()
+		if retained+capacity > p.config.MaxRetainedCapacity {
 			return DroppedFull
 		}
-		if generation.retainedBytes.CompareAndSwap(retained, retained+capacity) {
+		if generation.retainedCapacity.CompareAndSwap(retained, retained+capacity) {
 			break
 		}
 	}
@@ -229,7 +229,7 @@ func (p *Pool) releaseBounded(generation *poolGeneration, storage *block) Releas
 	// https://github.com/oxtoacart/bpool
 	entry := generation.boundedClasses[storage.class]
 	entry.mu.Lock()
-	entry.free = append(entry.free, storage)
+	entry.idle = append(entry.idle, storage)
 	entry.mu.Unlock()
 	generation.retainedBuffers.Add(1)
 	return Retained

@@ -73,7 +73,7 @@ func (p *Pool) Stats() Stats {
 		generation := p.current.Load()
 		stats.RetainedAvailable = true
 		stats.RetainedBuffers = generation.retainedBuffers.Load()
-		stats.RetainedCapacity = generation.retainedBytes.Load()
+		stats.RetainedCapacity = generation.retainedCapacity.Load()
 	}
 	if p.counters == nil {
 		return stats

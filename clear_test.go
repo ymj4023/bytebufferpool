@@ -18,10 +18,10 @@ func TestClearDropsStaleLeasesAcrossBackends(t *testing.T) {
 			MaxPooledCapacity: 64,
 		}},
 		{name: "Bounded", config: bytebufferpool.Config{
-			Mode:              bytebufferpool.Bounded,
-			Classes:           []int{64},
-			MaxPooledCapacity: 64,
-			MaxRetainedBytes:  128,
+			Mode:                bytebufferpool.Bounded,
+			Classes:             []int{64},
+			MaxPooledCapacity:   64,
+			MaxRetainedCapacity: 128,
 		}},
 	}
 
@@ -59,10 +59,10 @@ func TestClearDropsStaleLeasesAcrossBackends(t *testing.T) {
 
 func TestClearIsSafeWithConcurrentAcquireAndRelease(t *testing.T) {
 	pool, err := bytebufferpool.New(bytebufferpool.Config{
-		Mode:              bytebufferpool.Bounded,
-		Classes:           []int{64},
-		MaxPooledCapacity: 64,
-		MaxRetainedBytes:  8 * 64,
+		Mode:                bytebufferpool.Bounded,
+		Classes:             []int{64},
+		MaxPooledCapacity:   64,
+		MaxRetainedCapacity: 8 * 64,
 	})
 	if err != nil {
 		t.Fatalf("New(): %v", err)

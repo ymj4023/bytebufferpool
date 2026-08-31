@@ -48,7 +48,7 @@ func ExamplePool_bounded() {
 	config := bytebufferpool.DefaultConfig(bytebufferpool.Bounded)
 	config.Classes = []int{64}
 	config.MaxPooledCapacity = 64
-	config.MaxRetainedBytes = 64
+	config.MaxRetainedCapacity = 64
 	pool, _ := bytebufferpool.New(config)
 
 	first := pool.Acquire(64)

@@ -55,7 +55,7 @@ type Config struct {
 	Mode              Mode
 	Classes           []int
 	MaxPooledCapacity int
-	MaxRetainedBytes  int64
+	MaxRetainedCapacity  int64
 	MaxAcquireSize    int
 	ZeroOnRelease     bool
 	ValidationEnabled bool
@@ -72,7 +72,7 @@ Defaults:
 - Capacity Classes: powers of two from 64 B through 1 MiB.
 - `MaxPooledCapacity`: 1 MiB.
 - `MaxAcquireSize`: 0, meaning no additional single-acquisition limit.
-- `MaxRetainedBytes`: 32 MiB in `DefaultConfig(Bounded)` and invalid when non-zero in Fast mode.
+- `MaxRetainedCapacity`: 32 MiB in `DefaultConfig(Bounded)` and invalid when non-zero in Fast mode.
 - Clearing, enhanced validation, and optional statistics: disabled.
 
 Configuration validation:
@@ -81,8 +81,8 @@ Configuration validation:
 - `PowerOfTwo` requires positive power-of-two endpoints and includes both endpoints.
 - A zero `MaxPooledCapacity` selects the default; a negative value is invalid.
 - A non-zero `MaxAcquireSize` must be at least `MaxPooledCapacity`; a negative value is invalid.
-- Bounded mode requires `MaxRetainedBytes > 0`.
-- Fast mode rejects non-zero `MaxRetainedBytes` because it cannot honor an exact inventory budget.
+- Bounded mode requires `MaxRetainedCapacity > 0`.
+- Fast mode rejects non-zero `MaxRetainedCapacity` because it cannot honor an exact inventory budget.
 - When the last custom class is smaller than `MaxPooledCapacity`, requests in the gap are unpooled.
 
 ## Lease API
@@ -190,7 +190,7 @@ Bounded mode:
 - Reports exact retained buffers and Retained Capacity according to `sum(cap)`.
 - `Clear` releases current idle lists and resets retained inventory when no concurrent release refills them.
 
-`MaxRetainedBytes` limits idle byte-array capacity only. It is not a hard limit on allocator overhead, metadata, Go heap, or process RSS.
+`MaxRetainedCapacity` limits idle byte-array capacity only. It is not a hard limit on allocator overhead, metadata, Go heap, or process RSS.
 
 ## Clear semantics
 

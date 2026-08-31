@@ -10,11 +10,11 @@ import (
 
 func TestBoundedPoolEnforcesRetainedCapacity(t *testing.T) {
 	pool, err := bytebufferpool.New(bytebufferpool.Config{
-		Mode:              bytebufferpool.Bounded,
-		Classes:           []int{64},
-		MaxPooledCapacity: 64,
-		MaxRetainedBytes:  64,
-		StatsEnabled:      false,
+		Mode:                bytebufferpool.Bounded,
+		Classes:             []int{64},
+		MaxPooledCapacity:   64,
+		MaxRetainedCapacity: 64,
+		StatsEnabled:        false,
 	})
 	if err != nil {
 		t.Fatalf("New Bounded Pool: %v", err)
@@ -65,10 +65,10 @@ func TestBoundedPoolNeverExceedsBudgetUnderConcurrentRelease(t *testing.T) {
 		leases   = 128
 	)
 	pool, err := bytebufferpool.New(bytebufferpool.Config{
-		Mode:              bytebufferpool.Bounded,
-		Classes:           []int{capacity},
-		MaxPooledCapacity: capacity,
-		MaxRetainedBytes:  limit,
+		Mode:                bytebufferpool.Bounded,
+		Classes:             []int{capacity},
+		MaxPooledCapacity:   capacity,
+		MaxRetainedCapacity: limit,
 	})
 	if err != nil {
 		t.Fatalf("New Bounded Pool: %v", err)

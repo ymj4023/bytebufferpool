@@ -7,7 +7,7 @@ import "fmt"
 type Lease struct {
 	self       *Lease
 	pool       *Pool
-	storage    *block
+	storage    *backingStorage
 	token      uint64
 	generation uint64
 	released   bool

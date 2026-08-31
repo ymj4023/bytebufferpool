@@ -26,9 +26,6 @@ func (p *Pool) TryBuffer(initialCapacity int) (Buffer, error) {
 		return Buffer{}, err
 	}
 	buffer := Buffer{pool: p}
-	if initialCapacity == 0 {
-		return buffer, nil
-	}
 	lease, err := p.TryAcquire(initialCapacity)
 	if err != nil {
 		return Buffer{}, err
@@ -191,6 +188,7 @@ func (b *Buffer) checkUsable() {
 	if b.released {
 		panic("bytebufferpool: use of released Buffer")
 	}
+	b.lease.checkUsable()
 }
 
 func maxInt() int {

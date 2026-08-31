@@ -114,9 +114,8 @@ func (a *prometheusRawAdapter) Acquire(size int, borrowed *rawBorrowed) {
 func (a *prometheusRawAdapter) Release(borrowed *rawBorrowed) { a.pool.Put(borrowed.bytes) }
 
 func rawAdapters() []rawAdapter {
-	fast := mustPool(bytebufferpool.DefaultConfig(bytebufferpool.Fast))
 	boundedConfig := bytebufferpool.DefaultConfig(bytebufferpool.Bounded)
-	boundedConfig.MaxRetainedBytes = 64 << 20
+	boundedConfig.MaxRetainedCapacity = 64 << 20
 	bounded := mustPool(boundedConfig)
 	zeroConfig := bytebufferpool.DefaultConfig(bytebufferpool.Fast)
 	zeroConfig.ZeroOnRelease = true
@@ -133,8 +132,8 @@ func rawAdapters() []rawAdapter {
 		makeRawAdapter{},
 		&syncRawAdapter{name: "sync.Pool/Naive"},
 		&syncRawAdapter{name: "sync.Pool/Cutoff", maxRetainedCapacity: 1 << 20},
-		&projectLeaseAdapter{name: "Project/Fast/Lease", pool: fast},
-		&projectRawAdapter{name: "Project/Fast/Raw", pool: fast},
+		&projectLeaseAdapter{name: "Project/Fast/Lease", pool: mustPool(bytebufferpool.DefaultConfig(bytebufferpool.Fast))},
+		&projectRawAdapter{name: "Project/Fast/Raw", pool: mustPool(bytebufferpool.DefaultConfig(bytebufferpool.Fast))},
 		&projectRawAdapter{name: "Project/Bounded/Raw", pool: bounded},
 		&projectRawAdapter{name: "Project/Fast/RawZero", pool: mustPool(zeroConfig)},
 		&projectRawAdapter{name: "Project/Fast/RawValidation", pool: mustPool(validatedConfig)},
@@ -263,7 +262,7 @@ func (*projectBufferAdapter) Release(borrowed *bufferBorrowed) {
 
 func bufferAdapters() []bufferAdapter {
 	boundedConfig := bytebufferpool.DefaultConfig(bytebufferpool.Bounded)
-	boundedConfig.MaxRetainedBytes = 64 << 20
+	boundedConfig.MaxRetainedCapacity = 64 << 20
 	return []bufferAdapter{
 		newBytesBufferAdapter{},
 		&syncBytesBufferAdapter{name: "sync.Pool/bytes.Buffer/Naive"},

@@ -26,6 +26,7 @@ func (p *Pool) TryAcquireSlice(size int) ([]byte, error) {
 		return nil, err
 	}
 	if size == 0 {
+		p.recordAcquire(-1, false)
 		return nil, nil
 	}
 
@@ -50,24 +51,26 @@ func (p *Pool) ReleaseSlice(buffer []byte) ReleaseStatus {
 		return p.recordRelease(IgnoredNil, -1)
 	}
 
+	releaseCapacity := cap(buffer)
 	if p.config.ValidationEnabled {
-		status, proceed, owned := p.validateRawRelease(buffer)
+		status, proceed, owned, originalCapacity := p.validateRawRelease(buffer)
+		releaseCapacity = originalCapacity
 		if !proceed {
 			if owned {
-				p.prepareRawRelease(buffer)
+				p.prepareRawRelease(buffer, releaseCapacity)
 			}
 			return p.recordRelease(status, -1)
 		}
 	}
-	p.prepareRawRelease(buffer)
+	p.prepareRawRelease(buffer, releaseCapacity)
 
 	capacity := cap(buffer)
 	if capacity > p.config.MaxPooledCapacity {
-		return DroppedOversize
+		return p.recordRelease(DroppedOversize, -1)
 	}
 	class := p.classForCapacity(capacity)
 	if class < 0 {
-		return DroppedInvalid
+		return p.recordRelease(DroppedInvalid, -1)
 	}
 
 	storage := p.rawWrapper()
@@ -82,11 +85,11 @@ func (p *Pool) ReleaseSlice(buffer []byte) ReleaseStatus {
 	return status
 }
 
-func (p *Pool) rawWrapper() *block {
+func (p *Pool) rawWrapper() *backingStorage {
 	if value := p.rawWrappers.Get(); value != nil {
-		return value.(*block)
+		return value.(*backingStorage)
 	}
-	return &block{}
+	return &backingStorage{}
 }
 
 func (p *Pool) registerRaw(buffer []byte) {
@@ -100,34 +103,37 @@ func (p *Pool) registerRaw(buffer []byte) {
 	p.validationMu.Unlock()
 }
 
-func (p *Pool) validateRawRelease(buffer []byte) (status ReleaseStatus, proceed, owned bool) {
+func (p *Pool) validateRawRelease(buffer []byte) (status ReleaseStatus, proceed, owned bool, originalCapacity int) {
 	key := rawKey(buffer)
 	p.validationMu.Lock()
 	record, ok := p.rawRecords[key]
 	if !ok {
 		p.validationMu.Unlock()
-		return RejectedForeign, false, false
+		return RejectedForeign, false, false, cap(buffer)
 	}
 	if !record.active {
 		p.validationMu.Unlock()
-		return RejectedDuplicate, false, false
+		return RejectedDuplicate, false, false, record.capacity
 	}
 	record.active = false
 	p.rawRecords[key] = record
 	p.validationMu.Unlock()
 
 	if cap(buffer) != record.capacity {
-		return DroppedInvalid, false, true
+		return DroppedInvalid, false, true, record.capacity
 	}
-	return Retained, true, true
+	return Retained, true, true, record.capacity
 }
 
 func rawKey(buffer []byte) uintptr {
 	return uintptr(unsafe.Pointer(unsafe.SliceData(buffer)))
 }
 
-func (p *Pool) prepareRawRelease(buffer []byte) {
+func (p *Pool) prepareRawRelease(buffer []byte, originalCapacity int) {
 	full := buffer[:cap(buffer)]
+	if originalCapacity > cap(buffer) {
+		full = unsafe.Slice(unsafe.SliceData(buffer), originalCapacity)
+	}
 	if p.config.ZeroOnRelease {
 		clear(full)
 		p.recordZeroed(len(full))

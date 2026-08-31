@@ -14,7 +14,7 @@ This audit maps Spec Issue #1 to authoritative implementation, tests, documentat
 | 6 | Concise trusted-length acquisition | `Acquire`, `AcquireSlice`, and `Buffer` |
 | 7 | Requested length and sufficient capacity | Lease and Raw adapter contract tests |
 | 8 | Lease as the default ownership boundary | `Lease`, Pool Context, and ADR-0003 |
-| 9 | Detect duplicate Lease Release | shared block token/active state and duplicate-release tests |
+| 9 | Detect duplicate Lease Release | shared Backing Storage token/active state and duplicate-release tests |
 | 10 | Fail immediately after Lease Release | `checkUsable` and post-release panic tests |
 | 11 | Generation-bound Lease | `Clear`, `DroppedStale`, and Clear tests |
 | 12 | Clearly named Raw Slice API | `AcquireSlice`, `TryAcquireSlice`, `ReleaseSlice` |
