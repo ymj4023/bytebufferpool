@@ -184,31 +184,32 @@ func (p *Pool) classForCapacity(capacity int) int {
 }
 
 func (p *Pool) release(storage *backingStorage, leaseGeneration uint64) ReleaseStatus {
+	class := storage.class
 	generation := p.current.Load()
 	if leaseGeneration != generation.id {
-		return p.recordRelease(DroppedStale, storage.class)
+		return p.recordRelease(DroppedStale, class)
 	}
 	if cap(storage.buf) > p.config.MaxPooledCapacity {
-		return p.recordRelease(DroppedOversize, storage.class)
+		return p.recordRelease(DroppedOversize, class)
 	}
-	if storage.class < 0 {
-		return p.recordRelease(DroppedInvalid, storage.class)
+	if class < 0 {
+		return p.recordRelease(DroppedInvalid, class)
 	}
-	if storage.class >= len(p.sizes) || cap(storage.buf) != p.sizes[storage.class] {
-		return p.recordRelease(DroppedInvalid, storage.class)
+	if class >= len(p.sizes) || cap(storage.buf) != p.sizes[class] {
+		return p.recordRelease(DroppedInvalid, class)
 	}
 
 	storage.buf = storage.buf[:0]
 	if p.config.Mode == Bounded {
-		return p.recordRelease(p.releaseBounded(generation, storage), storage.class)
+		return p.recordRelease(p.releaseBounded(generation, storage), class)
 	}
 
 	// Design reference: libp2p/go-buffer-pool uses size-specific sync.Pools and
 	// wrapper reuse. This clean-room implementation associates the wrapper with
 	// ownership tokens and an explicit pooling cutoff instead of copying its API.
 	// https://github.com/libp2p/go-buffer-pool
-	generation.fastClasses[storage.class].pool.Put(storage)
-	return p.recordRelease(Retained, storage.class)
+	generation.fastClasses[class].pool.Put(storage)
+	return p.recordRelease(Retained, class)
 }
 
 func (p *Pool) releaseBounded(generation *poolGeneration, storage *backingStorage) ReleaseStatus {
