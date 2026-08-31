@@ -23,6 +23,10 @@ jobs:
           cache: false
       - run: go test ./...
       - run: go vet ./...
+      - if: matrix.go == 'stable'
+        run: go test -run '^$' -fuzz '^FuzzPoolConfiguration$' -fuzztime=5s
+      - if: matrix.go == 'stable'
+        run: go test -run '^$' -fuzz '^FuzzBufferOperations$' -fuzztime=5s
 
   race:
     name: Race detector
