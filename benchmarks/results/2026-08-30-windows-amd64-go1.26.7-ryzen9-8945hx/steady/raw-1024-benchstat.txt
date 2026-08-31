@@ -1,0 +1,117 @@
+goos: windows
+goarch: amd64
+pkg: github.com/ymj4023/bytebufferpool/benchmarks
+cpu: AMD Ryzen 9 8945HX with Radeon Graphics
+                                           │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\raw-1024.txt │
+                                           │                                                        sec/op                                                        │
+RawFixed/1024/Make                                                                                                                                   178.3n ± 10%
+RawFixed/1024/Make-8                                                                                                                                 285.0n ±  2%
+RawFixed/1024/sync.Pool/Naive                                                                                                                        23.89n ±  7%
+RawFixed/1024/sync.Pool/Naive-8                                                                                                                      25.38n ±  5%
+RawFixed/1024/sync.Pool/Cutoff                                                                                                                       24.66n ±  1%
+RawFixed/1024/sync.Pool/Cutoff-8                                                                                                                     25.05n ±  2%
+RawFixed/1024/Project/Fast/Lease                                                                                                                     69.77n ±  2%
+RawFixed/1024/Project/Fast/Lease-8                                                                                                                   69.15n ±  2%
+RawFixed/1024/Project/Fast/Raw                                                                                                                       67.36n ±  2%
+RawFixed/1024/Project/Fast/Raw-8                                                                                                                     65.49n ±  3%
+RawFixed/1024/Project/Bounded/Raw                                                                                                                    60.62n ±  7%
+RawFixed/1024/Project/Bounded/Raw-8                                                                                                                  68.89n ± 11%
+RawFixed/1024/Project/Fast/RawZero                                                                                                                   70.42n ±  9%
+RawFixed/1024/Project/Fast/RawZero-8                                                                                                                 70.58n ±  1%
+RawFixed/1024/Project/Fast/RawValidation                                                                                                             609.2n ±  8%
+RawFixed/1024/Project/Fast/RawValidation-8                                                                                                           611.4n ±  2%
+RawFixed/1024/Project/Fast/RawStats                                                                                                                  69.82n ±  2%
+RawFixed/1024/Project/Fast/RawStats-8                                                                                                                65.43n ± 14%
+RawFixed/1024/libp2p/v0.1.0                                                                                                                          45.24n ±  1%
+RawFixed/1024/libp2p/v0.1.0-8                                                                                                                        45.49n ±  0%
+RawFixed/1024/gRPC/v1.83.2/ZeroOnAcquire                                                                                                             43.13n ±  1%
+RawFixed/1024/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                           43.14n ±  3%
+RawFixed/1024/Prometheus/v0.314.0                                                                                                                    123.1n ±  1%
+RawFixed/1024/Prometheus/v0.314.0-8                                                                                                                  104.5n ±  1%
+geomean                                                                                                                                              73.91n
+
+                                           │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\raw-1024.txt │
+                                           │                                                         B/s                                                          │
+RawFixed/1024/Make                                                                                                                                  5.350Gi ± 11%
+RawFixed/1024/Make-8                                                                                                                                3.346Gi ±  2%
+RawFixed/1024/sync.Pool/Naive                                                                                                                       39.95Gi ±  7%
+RawFixed/1024/sync.Pool/Naive-8                                                                                                                     37.58Gi ±  5%
+RawFixed/1024/sync.Pool/Cutoff                                                                                                                      38.67Gi ±  1%
+RawFixed/1024/sync.Pool/Cutoff-8                                                                                                                    38.07Gi ±  2%
+RawFixed/1024/Project/Fast/Lease                                                                                                                    13.67Gi ±  2%
+RawFixed/1024/Project/Fast/Lease-8                                                                                                                  13.79Gi ±  2%
+RawFixed/1024/Project/Fast/Raw                                                                                                                      14.16Gi ±  2%
+RawFixed/1024/Project/Fast/Raw-8                                                                                                                    14.56Gi ±  3%
+RawFixed/1024/Project/Bounded/Raw                                                                                                                   15.73Gi ±  7%
+RawFixed/1024/Project/Bounded/Raw-8                                                                                                                 13.84Gi ± 12%
+RawFixed/1024/Project/Fast/RawZero                                                                                                                  13.54Gi ±  9%
+RawFixed/1024/Project/Fast/RawZero-8                                                                                                                13.51Gi ±  1%
+RawFixed/1024/Project/Fast/RawValidation                                                                                                            1.565Gi ±  9%
+RawFixed/1024/Project/Fast/RawValidation-8                                                                                                          1.560Gi ±  2%
+RawFixed/1024/Project/Fast/RawStats                                                                                                                 13.66Gi ±  2%
+RawFixed/1024/Project/Fast/RawStats-8                                                                                                               14.58Gi ± 16%
+RawFixed/1024/libp2p/v0.1.0                                                                                                                         21.08Gi ±  1%
+RawFixed/1024/libp2p/v0.1.0-8                                                                                                                       20.97Gi ±  0%
+RawFixed/1024/gRPC/v1.83.2/ZeroOnAcquire                                                                                                            22.11Gi ±  1%
+RawFixed/1024/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                          22.11Gi ±  3%
+RawFixed/1024/Prometheus/v0.314.0                                                                                                                   7.746Gi ±  1%
+RawFixed/1024/Prometheus/v0.314.0-8                                                                                                                 9.129Gi ±  1%
+geomean                                                                                                                                             12.90Gi
+
+                                           │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\raw-1024.txt │
+                                           │                                                         B/op                                                         │
+RawFixed/1024/Make                                                                                                                                 1.000Ki ± 0%
+RawFixed/1024/Make-8                                                                                                                               1.000Ki ± 0%
+RawFixed/1024/sync.Pool/Naive                                                                                                                        0.000 ± 0%
+RawFixed/1024/sync.Pool/Naive-8                                                                                                                      0.000 ± 0%
+RawFixed/1024/sync.Pool/Cutoff                                                                                                                       0.000 ± 0%
+RawFixed/1024/sync.Pool/Cutoff-8                                                                                                                     0.000 ± 0%
+RawFixed/1024/Project/Fast/Lease                                                                                                                     0.000 ± 0%
+RawFixed/1024/Project/Fast/Lease-8                                                                                                                   0.000 ± 0%
+RawFixed/1024/Project/Fast/Raw                                                                                                                       0.000 ± 0%
+RawFixed/1024/Project/Fast/Raw-8                                                                                                                     0.000 ± 0%
+RawFixed/1024/Project/Bounded/Raw                                                                                                                    0.000 ± 0%
+RawFixed/1024/Project/Bounded/Raw-8                                                                                                                  0.000 ± 0%
+RawFixed/1024/Project/Fast/RawZero                                                                                                                   0.000 ± 0%
+RawFixed/1024/Project/Fast/RawZero-8                                                                                                                 0.000 ± 0%
+RawFixed/1024/Project/Fast/RawValidation                                                                                                             0.000 ± 0%
+RawFixed/1024/Project/Fast/RawValidation-8                                                                                                           0.000 ± 0%
+RawFixed/1024/Project/Fast/RawStats                                                                                                                  0.000 ± 0%
+RawFixed/1024/Project/Fast/RawStats-8                                                                                                                0.000 ± 0%
+RawFixed/1024/libp2p/v0.1.0                                                                                                                          0.000 ± 0%
+RawFixed/1024/libp2p/v0.1.0-8                                                                                                                        0.000 ± 0%
+RawFixed/1024/gRPC/v1.83.2/ZeroOnAcquire                                                                                                             0.000 ± 0%
+RawFixed/1024/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                           0.000 ± 0%
+RawFixed/1024/Prometheus/v0.314.0                                                                                                                    48.00 ± 0%
+RawFixed/1024/Prometheus/v0.314.0-8                                                                                                                  48.00 ± 0%
+geomean                                                                                                                                                         ¹
+¹ summaries must be >0 to compute geomean
+
+                                           │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\raw-1024.txt │
+                                           │                                                      allocs/op                                                       │
+RawFixed/1024/Make                                                                                                                                   1.000 ± 0%
+RawFixed/1024/Make-8                                                                                                                                 1.000 ± 0%
+RawFixed/1024/sync.Pool/Naive                                                                                                                        0.000 ± 0%
+RawFixed/1024/sync.Pool/Naive-8                                                                                                                      0.000 ± 0%
+RawFixed/1024/sync.Pool/Cutoff                                                                                                                       0.000 ± 0%
+RawFixed/1024/sync.Pool/Cutoff-8                                                                                                                     0.000 ± 0%
+RawFixed/1024/Project/Fast/Lease                                                                                                                     0.000 ± 0%
+RawFixed/1024/Project/Fast/Lease-8                                                                                                                   0.000 ± 0%
+RawFixed/1024/Project/Fast/Raw                                                                                                                       0.000 ± 0%
+RawFixed/1024/Project/Fast/Raw-8                                                                                                                     0.000 ± 0%
+RawFixed/1024/Project/Bounded/Raw                                                                                                                    0.000 ± 0%
+RawFixed/1024/Project/Bounded/Raw-8                                                                                                                  0.000 ± 0%
+RawFixed/1024/Project/Fast/RawZero                                                                                                                   0.000 ± 0%
+RawFixed/1024/Project/Fast/RawZero-8                                                                                                                 0.000 ± 0%
+RawFixed/1024/Project/Fast/RawValidation                                                                                                             0.000 ± 0%
+RawFixed/1024/Project/Fast/RawValidation-8                                                                                                           0.000 ± 0%
+RawFixed/1024/Project/Fast/RawStats                                                                                                                  0.000 ± 0%
+RawFixed/1024/Project/Fast/RawStats-8                                                                                                                0.000 ± 0%
+RawFixed/1024/libp2p/v0.1.0                                                                                                                          0.000 ± 0%
+RawFixed/1024/libp2p/v0.1.0-8                                                                                                                        0.000 ± 0%
+RawFixed/1024/gRPC/v1.83.2/ZeroOnAcquire                                                                                                             0.000 ± 0%
+RawFixed/1024/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                           0.000 ± 0%
+RawFixed/1024/Prometheus/v0.314.0                                                                                                                    2.000 ± 0%
+RawFixed/1024/Prometheus/v0.314.0-8                                                                                                                  2.000 ± 0%
+geomean                                                                                                                                                         ¹
+¹ summaries must be >0 to compute geomean

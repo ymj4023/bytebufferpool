@@ -32,6 +32,8 @@ memorybench -contender all -small-size 1024 -small-iterations 10000 -peak-size 8
 
 `memory.json` contains all 33 raw child results and 66 min/mean/max summaries. The binary `.pprof` files are the corresponding GC2 heap profiles.
 
+Repeated steady-state raw output and `benchstat` summaries are documented in [`steady/README.md`](./steady/README.md).
+
 ## Interpretation boundary
 
 - `HeapAlloc`, `HeapInuse`, and `HeapSys` are Go runtime measurements, not Pool inventory.

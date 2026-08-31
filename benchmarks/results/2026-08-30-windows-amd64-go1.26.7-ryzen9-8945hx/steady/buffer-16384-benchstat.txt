@@ -1,0 +1,83 @@
+goos: windows
+goarch: amd64
+pkg: github.com/ymj4023/bytebufferpool/benchmarks
+cpu: AMD Ryzen 9 8945HX with Radeon Graphics
+                                                  │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\buffer-16384.txt │
+                                                  │                                                          sec/op                                                          │
+BufferFixed/16384/bytes.Buffer/New                                                                                                                              8.187µ ± 21%
+BufferFixed/16384/bytes.Buffer/New-8                                                                                                                            13.05µ ± 12%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Naive                                                                                                                  1.683µ ±  7%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Naive-8                                                                                                                1.681µ ±  4%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Cutoff                                                                                                                 1.571µ ±  8%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Cutoff-8                                                                                                               1.557µ ±  2%
+BufferFixed/16384/valyala/v1.0.0                                                                                                                                1.514µ ±  1%
+BufferFixed/16384/valyala/v1.0.0-8                                                                                                                              1.355µ ±  3%
+BufferFixed/16384/bpool/BufferPool                                                                                                                              1.643µ ±  0%
+BufferFixed/16384/bpool/BufferPool-8                                                                                                                            1.541µ ±  2%
+BufferFixed/16384/bpool/SizedBufferPool                                                                                                                         5.805µ ±  1%
+BufferFixed/16384/bpool/SizedBufferPool-8                                                                                                                       8.772µ ±  3%
+BufferFixed/16384/Project/Fast/Buffer                                                                                                                           2.998µ ±  1%
+BufferFixed/16384/Project/Fast/Buffer-8                                                                                                                         2.823µ ±  1%
+BufferFixed/16384/Project/Bounded/Buffer                                                                                                                        3.055µ ±  1%
+BufferFixed/16384/Project/Bounded/Buffer-8                                                                                                                      2.887µ ±  0%
+geomean                                                                                                                                                         2.803µ
+
+                                                  │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\buffer-16384.txt │
+                                                  │                                                           B/s                                                            │
+BufferFixed/16384/bytes.Buffer/New                                                                                                                             1.864Gi ± 17%
+BufferFixed/16384/bytes.Buffer/New-8                                                                                                                           1.170Gi ± 11%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Naive                                                                                                                 9.068Gi ±  7%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Naive-8                                                                                                               9.080Gi ±  4%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Cutoff                                                                                                                9.725Gi ±  8%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Cutoff-8                                                                                                              9.805Gi ±  2%
+BufferFixed/16384/valyala/v1.0.0                                                                                                                               10.08Gi ±  1%
+BufferFixed/16384/valyala/v1.0.0-8                                                                                                                             11.26Gi ±  3%
+BufferFixed/16384/bpool/BufferPool                                                                                                                             9.290Gi ±  0%
+BufferFixed/16384/bpool/BufferPool-8                                                                                                                           9.907Gi ±  2%
+BufferFixed/16384/bpool/SizedBufferPool                                                                                                                        2.629Gi ±  1%
+BufferFixed/16384/bpool/SizedBufferPool-8                                                                                                                      1.739Gi ±  3%
+BufferFixed/16384/Project/Fast/Buffer                                                                                                                          5.091Gi ±  1%
+BufferFixed/16384/Project/Fast/Buffer-8                                                                                                                        5.406Gi ±  1%
+BufferFixed/16384/Project/Bounded/Buffer                                                                                                                       4.996Gi ±  1%
+BufferFixed/16384/Project/Bounded/Buffer-8                                                                                                                     5.286Gi ±  0%
+geomean                                                                                                                                                        5.443Gi
+
+                                                  │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\buffer-16384.txt │
+                                                  │                                                           B/op                                                           │
+BufferFixed/16384/bytes.Buffer/New                                                                                                                              32.02Ki ± 0%
+BufferFixed/16384/bytes.Buffer/New-8                                                                                                                            32.02Ki ± 0%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Naive                                                                                                                    96.00 ± 0%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Naive-8                                                                                                                  96.00 ± 0%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Cutoff                                                                                                                   96.00 ± 0%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Cutoff-8                                                                                                                 96.00 ± 0%
+BufferFixed/16384/valyala/v1.0.0                                                                                                                                  96.00 ± 0%
+BufferFixed/16384/valyala/v1.0.0-8                                                                                                                                96.00 ± 0%
+BufferFixed/16384/bpool/BufferPool                                                                                                                                96.00 ± 0%
+BufferFixed/16384/bpool/BufferPool-8                                                                                                                              96.00 ± 0%
+BufferFixed/16384/bpool/SizedBufferPool                                                                                                                         28.14Ki ± 0%
+BufferFixed/16384/bpool/SizedBufferPool-8                                                                                                                       28.14Ki ± 0%
+BufferFixed/16384/Project/Fast/Buffer                                                                                                                             96.00 ± 0%
+BufferFixed/16384/Project/Fast/Buffer-8                                                                                                                           97.00 ± 0%
+BufferFixed/16384/Project/Bounded/Buffer                                                                                                                          96.00 ± 0%
+BufferFixed/16384/Project/Bounded/Buffer-8                                                                                                                        96.00 ± 0%
+geomean                                                                                                                                                           406.3
+
+                                                  │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\buffer-16384.txt │
+                                                  │                                                        allocs/op                                                         │
+BufferFixed/16384/bytes.Buffer/New                                                                                                                                10.00 ± 0%
+BufferFixed/16384/bytes.Buffer/New-8                                                                                                                              10.00 ± 0%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Naive                                                                                                                    1.000 ± 0%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Naive-8                                                                                                                  1.000 ± 0%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Cutoff                                                                                                                   1.000 ± 0%
+BufferFixed/16384/sync.Pool/bytes.Buffer/Cutoff-8                                                                                                                 1.000 ± 0%
+BufferFixed/16384/valyala/v1.0.0                                                                                                                                  1.000 ± 0%
+BufferFixed/16384/valyala/v1.0.0-8                                                                                                                                1.000 ± 0%
+BufferFixed/16384/bpool/BufferPool                                                                                                                                1.000 ± 0%
+BufferFixed/16384/bpool/BufferPool-8                                                                                                                              1.000 ± 0%
+BufferFixed/16384/bpool/SizedBufferPool                                                                                                                           5.000 ± 0%
+BufferFixed/16384/bpool/SizedBufferPool-8                                                                                                                         5.000 ± 0%
+BufferFixed/16384/Project/Fast/Buffer                                                                                                                             1.000 ± 0%
+BufferFixed/16384/Project/Fast/Buffer-8                                                                                                                           1.000 ± 0%
+BufferFixed/16384/Project/Bounded/Buffer                                                                                                                          1.000 ± 0%
+BufferFixed/16384/Project/Bounded/Buffer-8                                                                                                                        1.000 ± 0%
+geomean                                                                                                                                                           1.631
