@@ -66,8 +66,8 @@ func TestBufferGrowthReleasesOldLease(t *testing.T) {
 	}
 
 	stats := pool.Stats()
-	if stats.RetainedBuffers != 1 || stats.RetainedCapacity != 64 {
-		t.Fatalf("inventory after growth = %d buffers/%d bytes; want released old Lease 1/64", stats.RetainedBuffers, stats.RetainedCapacity)
+	if stats.RetainedStorageCount != 1 || stats.RetainedCapacity != 64 {
+		t.Fatalf("inventory after growth = %d storage objects/%d bytes; want released old Lease 1/64", stats.RetainedStorageCount, stats.RetainedCapacity)
 	}
 	if buffer.Cap() != 128 || buffer.Len() != 65 {
 		t.Fatalf("grown Buffer = len %d/cap %d; want 65/128", buffer.Len(), buffer.Cap())
@@ -99,6 +99,33 @@ func TestBufferGrowthFailurePreservesContent(t *testing.T) {
 	}
 	if !bytes.Equal(buffer.Bytes(), want) || buffer.Cap() != 64 {
 		t.Fatalf("failed growth mutated Buffer: bytes=%q cap=%d; want %q cap=64", buffer.Bytes(), buffer.Cap(), want)
+	}
+}
+
+func TestBufferWritePreservesSelfAliasDuringGrowth(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:                bytebufferpool.Bounded,
+		Classes:             []int{64, 128},
+		MaxPooledCapacity:   128,
+		MaxRetainedCapacity: 256,
+		ZeroOnRelease:       true,
+	})
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+	buffer := pool.Buffer(64)
+	defer buffer.Release()
+	original := bytes.Repeat([]byte("a"), 40)
+	if _, err := buffer.Write(original); err != nil {
+		t.Fatalf("seed Write(): %v", err)
+	}
+
+	if n, err := buffer.Write(buffer.Bytes()); err != nil || n != len(original) {
+		t.Fatalf("self-alias Write() = %d, %v; want %d, nil", n, err, len(original))
+	}
+	want := append(append([]byte(nil), original...), original...)
+	if !bytes.Equal(buffer.Bytes(), want) {
+		t.Fatalf("self-alias growth = %q; want %q", buffer.Bytes(), want)
 	}
 }
 

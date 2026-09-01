@@ -13,9 +13,9 @@ type ClassStats struct {
 
 // Stats is a point-in-time view of Pool inventory and optional operations.
 type Stats struct {
-	RetainedAvailable bool
-	RetainedBuffers   int64
-	RetainedCapacity  int64
+	RetainedAvailable    bool
+	RetainedStorageCount int64
+	RetainedCapacity     int64
 
 	CountersAvailable bool
 	Acquires          uint64
@@ -71,9 +71,18 @@ func (p *Pool) Stats() Stats {
 	stats := Stats{}
 	if p.config.Mode == Bounded {
 		generation := p.current.Load()
+		for _, class := range generation.boundedClasses {
+			class.mu.Lock()
+		}
 		stats.RetainedAvailable = true
-		stats.RetainedBuffers = generation.retainedBuffers.Load()
-		stats.RetainedCapacity = generation.retainedCapacity.Load()
+		for _, class := range generation.boundedClasses {
+			count := int64(len(class.idle))
+			stats.RetainedStorageCount += count
+			stats.RetainedCapacity += count * int64(class.size)
+		}
+		for i := len(generation.boundedClasses) - 1; i >= 0; i-- {
+			generation.boundedClasses[i].mu.Unlock()
+		}
 	}
 	if p.counters == nil {
 		return stats

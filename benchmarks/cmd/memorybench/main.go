@@ -34,14 +34,14 @@ type options struct {
 }
 
 type sample struct {
-	Phase             string `json:"phase"`
-	HeapAlloc         uint64 `json:"heap_alloc"`
-	HeapInuse         uint64 `json:"heap_inuse"`
-	HeapSys           uint64 `json:"heap_sys"`
-	NumGC             uint32 `json:"num_gc"`
-	RetainedAvailable bool   `json:"retained_available"`
-	RetainedBuffers   int64  `json:"retained_buffers"`
-	RetainedCapacity  int64  `json:"retained_capacity"`
+	Phase                string `json:"phase"`
+	HeapAlloc            uint64 `json:"heap_alloc"`
+	HeapInuse            uint64 `json:"heap_inuse"`
+	HeapSys              uint64 `json:"heap_sys"`
+	NumGC                uint32 `json:"num_gc"`
+	RetainedAvailable    bool   `json:"retained_available"`
+	RetainedStorageCount int64  `json:"retained_storage_count"`
+	RetainedCapacity     int64  `json:"retained_capacity"`
 }
 
 type result struct {
@@ -139,7 +139,7 @@ func (p *projectPool) Release(value *borrowed) {
 }
 func (p *projectPool) Inventory() (int64, int64, bool) {
 	stats := p.pool.Stats()
-	return stats.RetainedBuffers, stats.RetainedCapacity, stats.RetainedAvailable
+	return stats.RetainedStorageCount, stats.RetainedCapacity, stats.RetainedAvailable
 }
 
 type libp2pPool struct{ pool libp2ppool.BufferPool }
@@ -392,14 +392,14 @@ func takeSample(phase string, pool memoryPool) sample {
 	runtime.ReadMemStats(&memory)
 	buffers, capacity, available := pool.Inventory()
 	return sample{
-		Phase:             phase,
-		HeapAlloc:         memory.HeapAlloc,
-		HeapInuse:         memory.HeapInuse,
-		HeapSys:           memory.HeapSys,
-		NumGC:             memory.NumGC,
-		RetainedAvailable: available,
-		RetainedBuffers:   buffers,
-		RetainedCapacity:  capacity,
+		Phase:                phase,
+		HeapAlloc:            memory.HeapAlloc,
+		HeapInuse:            memory.HeapInuse,
+		HeapSys:              memory.HeapSys,
+		NumGC:                memory.NumGC,
+		RetainedAvailable:    available,
+		RetainedStorageCount: buffers,
+		RetainedCapacity:     capacity,
 	}
 }
 

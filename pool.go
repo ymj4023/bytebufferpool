@@ -28,7 +28,6 @@ type poolGeneration struct {
 	id               uint64
 	fastClasses      []*fastClass
 	boundedClasses   []*boundedClass
-	retainedBuffers  atomic.Int64
 	retainedCapacity atomic.Int64
 }
 
@@ -144,6 +143,7 @@ func (p *Pool) acquireStorage(size int) (*backingStorage, *poolGeneration) {
 			entry := generation.boundedClasses[class]
 			entry.mu.Lock()
 			if last := len(entry.idle) - 1; last >= 0 {
+				generation.retainedCapacity.Add(-int64(entry.size))
 				storage = entry.idle[last]
 				entry.idle[last] = nil
 				entry.idle = entry.idle[:last]
@@ -151,8 +151,6 @@ func (p *Pool) acquireStorage(size int) (*backingStorage, *poolGeneration) {
 			entry.mu.Unlock()
 			if storage != nil {
 				hit = true
-				generation.retainedBuffers.Add(-1)
-				generation.retainedCapacity.Add(-int64(entry.size))
 			} else {
 				storage = &backingStorage{buf: make([]byte, 0, entry.size), class: class}
 			}
@@ -232,6 +230,5 @@ func (p *Pool) releaseBounded(generation *poolGeneration, storage *backingStorag
 	entry.mu.Lock()
 	entry.idle = append(entry.idle, storage)
 	entry.mu.Unlock()
-	generation.retainedBuffers.Add(1)
 	return Retained
 }

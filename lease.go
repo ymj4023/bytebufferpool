@@ -3,7 +3,7 @@ package bytebufferpool
 import "fmt"
 
 // Lease grants exclusive, generation-bound ownership of Backing Storage.
-// A Lease must not be copied after first use.
+// A Lease must never be copied. Pass a pointer when sharing ownership APIs.
 type Lease struct {
 	self       *Lease
 	pool       *Pool

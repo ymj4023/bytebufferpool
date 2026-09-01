@@ -172,7 +172,7 @@ b := lease.Bytes() // len == size；归还后不再有效
 API 和文档应区分：
 
 1. `MaxPooledCapacity`：单个 buffer 超过它就不保留。
-2. `MaxRetainedCapacity`：池中所有空闲 buffer 的硬预算。
+2. `MaxRetainedCapacity`：池中所有空闲 Backing Storage 的硬预算。
 3. `MaxAcquireSize`：单次请求的业务保护；超过时返回 error，而不是尝试分配。
 
 `valyala` 只有动态的第一类近似阈值，`bpool` 只有按对象数的第二类近似。把三者混成一个 `max` 会导致用户误解 OOM 行为。

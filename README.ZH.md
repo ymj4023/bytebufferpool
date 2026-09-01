@@ -90,7 +90,7 @@ pool, err := bytebufferpool.New(config)
 | 模式 | 保留方式 | 库存可观测性 |
 | --- | --- | --- |
 | Fast | 每个 Capacity Class 使用一个 runtime-managed pool | best-effort；无法提供精确保留量 |
-| Bounded | 每级 LIFO 共享一个全局字节容量预算 | 精确的空闲 buffer 数和 Retained Capacity |
+| Bounded | 每级 LIFO 共享一个全局字节容量预算 | 精确的空闲 Backing Storage 数量和 Retained Capacity |
 
 Retained Capacity 指空闲 Backing Storage 的 `sum(cap)`，不等于 allocator overhead、Go heap、`HeapSys` 或进程 RSS。
 

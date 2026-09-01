@@ -56,7 +56,7 @@ func ExamplePool_bounded() {
 	fmt.Println(first.Release())
 	fmt.Println(second.Release())
 	stats := pool.Stats()
-	fmt.Println(stats.RetainedBuffers, stats.RetainedCapacity)
+	fmt.Println(stats.RetainedStorageCount, stats.RetainedCapacity)
 
 	// Output:
 	// Retained

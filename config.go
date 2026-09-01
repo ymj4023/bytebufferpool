@@ -58,7 +58,7 @@ func normalizeConfig(config Config) (Config, error) {
 		return Config{}, fmt.Errorf("%w: acquisition limit %d is below pooling cutoff %d", ErrInvalidConfig, config.MaxAcquireSize, config.MaxPooledCapacity)
 	}
 	if config.Mode == Fast && config.MaxRetainedCapacity != 0 {
-		return Config{}, fmt.Errorf("%w: Fast mode cannot promise retained bytes", ErrInvalidConfig)
+		return Config{}, fmt.Errorf("%w: Fast mode cannot promise exact Retained Capacity", ErrInvalidConfig)
 	}
 	if config.Mode == Bounded && config.MaxRetainedCapacity <= 0 {
 		return Config{}, fmt.Errorf("%w: Bounded mode requires a positive retained-capacity budget", ErrInvalidConfig)

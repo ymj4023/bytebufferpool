@@ -3,6 +3,7 @@ package bytebufferpool_test
 import (
 	"errors"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	bytebufferpool "github.com/ymj4023/bytebufferpool"
@@ -33,14 +34,14 @@ func TestBoundedPoolEnforcesRetainedCapacity(t *testing.T) {
 	if !stats.RetainedAvailable {
 		t.Fatal("Bounded Stats reported retained inventory unavailable")
 	}
-	if stats.RetainedBuffers != 1 || stats.RetainedCapacity != 64 {
-		t.Fatalf("Bounded retained inventory = %d buffers/%d bytes; want 1/64", stats.RetainedBuffers, stats.RetainedCapacity)
+	if stats.RetainedStorageCount != 1 || stats.RetainedCapacity != 64 {
+		t.Fatalf("Bounded retained inventory = %d storage objects/%d bytes; want 1/64", stats.RetainedStorageCount, stats.RetainedCapacity)
 	}
 
 	reused := pool.Acquire(64)
 	stats = pool.Stats()
-	if stats.RetainedBuffers != 0 || stats.RetainedCapacity != 0 {
-		t.Fatalf("inventory after Acquire = %d buffers/%d bytes; want 0/0", stats.RetainedBuffers, stats.RetainedCapacity)
+	if stats.RetainedStorageCount != 0 || stats.RetainedCapacity != 0 {
+		t.Fatalf("inventory after Acquire = %d storage objects/%d bytes; want 0/0", stats.RetainedStorageCount, stats.RetainedCapacity)
 	}
 	if got := reused.Release(); got != bytebufferpool.Retained {
 		t.Fatalf("reused Release() = %v; want Retained", got)
@@ -93,7 +94,62 @@ func TestBoundedPoolNeverExceedsBudgetUnderConcurrentRelease(t *testing.T) {
 	if stats.RetainedCapacity > limit {
 		t.Fatalf("RetainedCapacity = %d; exceeds budget %d", stats.RetainedCapacity, limit)
 	}
-	if stats.RetainedBuffers*capacity != stats.RetainedCapacity {
-		t.Fatalf("retained inventory inconsistent: %d buffers/%d bytes", stats.RetainedBuffers, stats.RetainedCapacity)
+	if stats.RetainedStorageCount*capacity != stats.RetainedCapacity {
+		t.Fatalf("retained inventory inconsistent: %d storage objects/%d bytes", stats.RetainedStorageCount, stats.RetainedCapacity)
+	}
+}
+
+func TestBoundedPoolReportsExactInventoryDuringConcurrentReuse(t *testing.T) {
+	const (
+		capacity   = 64
+		workers    = 8
+		iterations = 10_000
+	)
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:                bytebufferpool.Bounded,
+		Classes:             []int{capacity},
+		MaxPooledCapacity:   capacity,
+		MaxRetainedCapacity: workers * capacity,
+	})
+	if err != nil {
+		t.Fatalf("New Bounded Pool: %v", err)
+	}
+
+	var unexpectedReleases atomic.Int64
+	var wait sync.WaitGroup
+	for range workers {
+		wait.Add(1)
+		go func() {
+			defer wait.Done()
+			for range iterations {
+				lease := pool.Acquire(capacity)
+				if lease.Release() != bytebufferpool.Retained {
+					unexpectedReleases.Add(1)
+				}
+			}
+		}()
+	}
+	done := make(chan struct{})
+	go func() {
+		wait.Wait()
+		close(done)
+	}()
+
+	for {
+		select {
+		case <-done:
+			if got := unexpectedReleases.Load(); got != 0 {
+				t.Fatalf("unexpected release statuses = %d; want 0", got)
+			}
+			return
+		default:
+			stats := pool.Stats()
+			if stats.RetainedStorageCount < 0 || stats.RetainedStorageCount > workers {
+				t.Fatalf("RetainedStorageCount = %d; want within [0,%d]", stats.RetainedStorageCount, workers)
+			}
+			if stats.RetainedCapacity != stats.RetainedStorageCount*capacity {
+				t.Fatalf("inventory snapshot = %d storage objects/%d bytes; want exact capacity", stats.RetainedStorageCount, stats.RetainedCapacity)
+			}
+		}
 	}
 }

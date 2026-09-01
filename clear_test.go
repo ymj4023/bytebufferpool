@@ -45,8 +45,8 @@ func TestClearDropsStaleLeasesAcrossBackends(t *testing.T) {
 			}
 
 			stats := pool.Stats()
-			if test.config.Mode == bytebufferpool.Bounded && (stats.RetainedBuffers != 0 || stats.RetainedCapacity != 0) {
-				t.Fatalf("inventory after Clear = %d buffers/%d bytes; want 0/0", stats.RetainedBuffers, stats.RetainedCapacity)
+			if test.config.Mode == bytebufferpool.Bounded && (stats.RetainedStorageCount != 0 || stats.RetainedCapacity != 0) {
+				t.Fatalf("inventory after Clear = %d storage objects/%d bytes; want 0/0", stats.RetainedStorageCount, stats.RetainedCapacity)
 			}
 
 			current := pool.Acquire(64)

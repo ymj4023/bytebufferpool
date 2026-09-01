@@ -39,12 +39,14 @@ func BenchmarkRawMixed(b *testing.B) {
 			b.SetBytes(int64(average))
 			b.ResetTimer()
 			var borrowed rawBorrowed
+			var sink uint64
 			for i := 0; i < b.N; i++ {
 				size := trace[i%len(trace)]
 				adapter.Acquire(size, &borrowed)
-				touchRaw(borrowed.bytes)
+				sink ^= touchRaw(borrowed.bytes)
 				adapter.Release(&borrowed)
 			}
+			benchmarkSink.Add(sink)
 		})
 	}
 }
@@ -57,11 +59,13 @@ func BenchmarkRawParallel(b *testing.B) {
 			b.SetBytes(size)
 			b.RunParallel(func(iterations *testing.PB) {
 				var borrowed rawBorrowed
+				var sink uint64
 				for iterations.Next() {
 					adapter.Acquire(size, &borrowed)
-					touchRaw(borrowed.bytes)
+					sink ^= touchRaw(borrowed.bytes)
 					adapter.Release(&borrowed)
 				}
+				benchmarkSink.Add(sink)
 			})
 		})
 	}
@@ -86,14 +90,16 @@ func BenchmarkBufferParallel(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(size)
 			b.RunParallel(func(iterations *testing.PB) {
+				var sink uint64
 				for iterations.Next() {
 					borrowed := adapter.Acquire()
 					for _, chunk := range chunks {
 						adapter.Write(&borrowed, chunk)
 					}
-					touchRaw(adapter.Bytes(&borrowed))
+					sink ^= touchRaw(adapter.Bytes(&borrowed))
 					adapter.Release(&borrowed)
 				}
+				benchmarkSink.Add(sink)
 			})
 		})
 	}
@@ -104,14 +110,16 @@ func BenchmarkRawLifecycle(b *testing.B) {
 	b.Run("Cold/Project/Fast/Raw", func(b *testing.B) {
 		b.ReportAllocs()
 		b.SetBytes(size)
+		var sink uint64
 		for i := 0; i < b.N; i++ {
 			b.StopTimer()
 			pool := mustPool(bytebufferpool.DefaultConfig(bytebufferpool.Fast))
 			b.StartTimer()
 			buffer := pool.AcquireSlice(size)
-			touchRaw(buffer)
+			sink ^= touchRaw(buffer)
 			pool.ReleaseSlice(buffer)
 		}
+		benchmarkSink.Add(sink)
 	})
 
 	b.Run("Warm/Project/Fast/Raw", func(b *testing.B) {
@@ -121,17 +129,20 @@ func BenchmarkRawLifecycle(b *testing.B) {
 		b.ReportAllocs()
 		b.SetBytes(size)
 		b.ResetTimer()
+		var sink uint64
 		for i := 0; i < b.N; i++ {
 			buffer := pool.AcquireSlice(size)
-			touchRaw(buffer)
+			sink ^= touchRaw(buffer)
 			pool.ReleaseSlice(buffer)
 		}
+		benchmarkSink.Add(sink)
 	})
 
 	b.Run("PostGC/Project/Fast/Raw", func(b *testing.B) {
 		pool := mustPool(bytebufferpool.DefaultConfig(bytebufferpool.Fast))
 		b.ReportAllocs()
 		b.SetBytes(size)
+		var sink uint64
 		for i := 0; i < b.N; i++ {
 			b.StopTimer()
 			seed := pool.AcquireSlice(size)
@@ -139,9 +150,10 @@ func BenchmarkRawLifecycle(b *testing.B) {
 			runtime.GC()
 			b.StartTimer()
 			buffer := pool.AcquireSlice(size)
-			touchRaw(buffer)
+			sink ^= touchRaw(buffer)
 			pool.ReleaseSlice(buffer)
 		}
+		benchmarkSink.Add(sink)
 	})
 }
 
@@ -175,11 +187,13 @@ func benchmarkRawSize(b *testing.B, adapter rawAdapter, size int) {
 	b.SetBytes(int64(size))
 	b.ResetTimer()
 	var borrowed rawBorrowed
+	var sink uint64
 	for i := 0; i < b.N; i++ {
 		adapter.Acquire(size, &borrowed)
-		touchRaw(borrowed.bytes)
+		sink ^= touchRaw(borrowed.bytes)
 		adapter.Release(&borrowed)
 	}
+	benchmarkSink.Add(sink)
 }
 
 func benchmarkBufferChunks(b *testing.B, adapter bufferAdapter, chunks [][]byte, size int) {
@@ -187,23 +201,25 @@ func benchmarkBufferChunks(b *testing.B, adapter bufferAdapter, chunks [][]byte,
 	b.ReportAllocs()
 	b.SetBytes(int64(size))
 	b.ResetTimer()
+	var sink uint64
 	for i := 0; i < b.N; i++ {
 		borrowed := adapter.Acquire()
 		for _, chunk := range chunks {
 			adapter.Write(&borrowed, chunk)
 		}
-		touchRaw(adapter.Bytes(&borrowed))
+		sink ^= touchRaw(adapter.Bytes(&borrowed))
 		adapter.Release(&borrowed)
 	}
+	benchmarkSink.Add(sink)
 }
 
-func touchRaw(buffer []byte) {
+func touchRaw(buffer []byte) uint64 {
 	if len(buffer) == 0 {
-		return
+		return 0
 	}
 	buffer[0]++
 	buffer[len(buffer)-1]++
-	benchmarkSink.Add(uint64(buffer[0] ^ buffer[len(buffer)-1]))
+	return uint64(buffer[0] ^ buffer[len(buffer)-1])
 }
 
 func capacityBoundaries() []int {

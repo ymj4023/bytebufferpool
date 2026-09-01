@@ -89,10 +89,27 @@ func (b *Buffer) Write(data []byte) (int, error) {
 	if len(data) > maxInt()-b.length() {
 		return 0, fmt.Errorf("%w: Buffer length overflow", ErrInvalidSize)
 	}
-	if err := b.ensureCapacity(b.length() + len(data)); err != nil {
+	required := b.length() + len(data)
+	if required > cap(b.lease.storage.buf) {
+		return b.writeWithGrowth(data, required)
+	}
+	if err := b.ensureCapacity(required); err != nil {
 		return 0, err
 	}
 	b.lease.storage.buf = append(b.lease.storage.buf, data...)
+	return len(data), nil
+}
+
+func (b *Buffer) writeWithGrowth(data []byte, required int) (int, error) {
+	lease, err := b.pool.TryAcquire(required)
+	if err != nil {
+		return 0, err
+	}
+	oldLength := b.length()
+	copy(lease.storage.buf, b.lease.storage.buf)
+	copy(lease.storage.buf[oldLength:], data)
+	b.lease.Release()
+	b.lease = lease
 	return len(data), nil
 }
 

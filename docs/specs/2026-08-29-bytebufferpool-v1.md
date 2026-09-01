@@ -187,7 +187,7 @@ Bounded mode:
 - Maintains a per-class LIFO of idle Backing Storage.
 - Uses an atomic global Retained Capacity reservation.
 - Drops a release without blocking when the capacity budget cannot be reserved.
-- Reports exact retained buffers and Retained Capacity according to `sum(cap)`.
+- Reports the exact idle Backing Storage count and Retained Capacity according to `sum(cap)`.
 - `Clear` releases current idle lists and resets retained inventory when no concurrent release refills them.
 
 `MaxRetainedCapacity` limits idle byte-array capacity only. It is not a hard limit on allocator overhead, metadata, Go heap, or process RSS.
@@ -221,7 +221,7 @@ Optional counters include acquire, hit, miss, release, retained, each drop reaso
 
 When `StatsEnabled` is false, optional per-operation counters are not updated. Bounded mode still maintains the retained counters needed to enforce its budget.
 
-Bounded snapshots mark retained buffers and bytes as available. Fast snapshots mark them unavailable rather than estimating values that the runtime can invalidate silently. Statistics have no dependency on a monitoring client.
+Bounded snapshots lock the per-class idle lists to report an exact Backing Storage count and Retained Capacity. Fast snapshots mark retained inventory unavailable rather than estimating values that the runtime can invalidate silently. Statistics have no dependency on a monitoring client.
 
 ## Verification
 

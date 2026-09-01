@@ -90,7 +90,7 @@ pool, err := bytebufferpool.New(config)
 | Mode | Retention | Inventory |
 | --- | --- | --- |
 | Fast | One runtime-managed pool per Capacity Class | Best-effort; exact retained values unavailable |
-| Bounded | Per-class LIFO under a global byte-capacity budget | Exact idle buffer count and Retained Capacity |
+| Bounded | Per-class LIFO under a global byte-capacity budget | Exact idle Backing Storage count and Retained Capacity |
 
 Retained Capacity is `sum(cap)` of idle Backing Storage. It is not allocator overhead, Go heap, `HeapSys`, or process RSS.
 

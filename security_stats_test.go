@@ -170,7 +170,7 @@ func TestOptionalStatsStayDisabledWithoutLosingBoundedInventory(t *testing.T) {
 	if stats.CountersAvailable || stats.Acquires != 0 || stats.Releases != 0 || len(stats.Classes) != 0 {
 		t.Fatalf("disabled optional counters leaked data: %+v", stats)
 	}
-	if !stats.RetainedAvailable || stats.RetainedBuffers != 1 || stats.RetainedCapacity != 64 {
+	if !stats.RetainedAvailable || stats.RetainedStorageCount != 1 || stats.RetainedCapacity != 64 {
 		t.Fatalf("mandatory Bounded inventory lost when counters disabled: %+v", stats)
 	}
 }
