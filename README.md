@@ -128,31 +128,31 @@ In Fast mode, `Retained` means accepted by a best-effort runtime pool; the runti
 
 ## Benchmark results
 
-These are medians from Windows/amd64, Go 1.26.7, AMD Ryzen 9 8945HX. Each steady group used 10 samples with `-benchtime=1s -cpu=1,8`. The tables below show the CPU=1 result and intentionally compare only the named workload.
+These are medians from Windows/amd64, Go 1.26.7, AMD Ryzen 9 8945HX. The two fixed-size tables use 10 samples with `-benchtime=1s -cpu=1,8`; the lifecycle table uses 10 samples with `-benchtime=20x -cpu=1,8`. The tables show the CPU=1 result and intentionally compare only the named workload.
 
 ### Raw requested-length API — 1 KiB
 
 | Contender | ns/op | B/op | allocs/op |
 | --- | ---: | ---: | ---: |
-| `make` | 175.9 | 1024 | 1 |
-| `sync.Pool` with cutoff | 25.62 | 0 | 0 |
-| Project Fast Lease | 69.58 | 0 | 0 |
-| Project Fast Raw | 67.47 | 0 | 0 |
-| Project Bounded Raw | 56.73 | 0 | 0 |
-| libp2p v0.1.0 | 45.25 | 0 | 0 |
-| gRPC v1.83.2, zero on acquire | 42.88 | 0 | 0 |
-| Prometheus v0.314.0 | 123.8 | 48 | 2 |
+| `make` | 174.0 | 1024 | 1 |
+| `sync.Pool` with cutoff | 24.59 | 0 | 0 |
+| Project Fast Lease | 71.77 | 0 | 0 |
+| Project Fast Raw | 65.29 | 0 | 0 |
+| Project Bounded Raw | 58.47 | 0 | 0 |
+| libp2p v0.1.0 | 48.06 | 0 | 0 |
+| gRPC v1.83.2, zero on acquire | 47.18 | 0 | 0 |
+| Prometheus v0.314.0 | 135.8 | 48 | 2 |
 
 ### Append Buffer — 16 KiB in 128-byte chunks
 
 | Contender | µs/op | B/op | allocs/op |
 | --- | ---: | ---: | ---: |
-| new `bytes.Buffer` | 3.177 | 32.02 KiB | 10 |
-| pooled `bytes.Buffer` with cutoff | 1.552 | 96 | 1 |
-| valyala v1.0.0 | 1.439 | 96 | 1 |
-| bpool SizedBufferPool | 6.010 | 28.14 KiB | 5 |
-| Project Fast Buffer | 3.504 | 96 | 1 |
-| Project Bounded Buffer | 3.402 | 96 | 1 |
+| new `bytes.Buffer` | 7.502 | 32.02 KiB | 10 |
+| pooled `bytes.Buffer` with cutoff | 1.756 | 96 | 1 |
+| valyala v1.0.0 | 1.568 | 96 | 1 |
+| bpool SizedBufferPool | 6.618 | 28.14 KiB | 5 |
+| Project Fast Buffer | 3.763 | 96 | 1 |
+| Project Bounded Buffer | 3.882 | 96 | 1 |
 
 The project is not universally fastest in these workloads. Its distinguishing behavior is deterministic sizing, explicit ownership, stale-generation rejection, and an exact optional Retained Capacity budget.
 
@@ -160,10 +160,10 @@ The project is not universally fastest in these workloads. Its distinguishing be
 
 | State | ns/op | B/op | allocs/op |
 | --- | ---: | ---: | ---: |
-| Cold | 1,435 | 1,378 | 4 |
-| Warm | 70.0 | 0 | 0 |
-| PostGC | 982.5 | 354 | 5 |
-| Bounded two-Release budget exhaustion | 247.5 | 8 | 1 |
+| Cold | 712.5 | 1,378 | 4 |
+| Warm | 32.50 | 0 | 0 |
+| PostGC | 502.5 | 353 | 5 |
+| Bounded two-Release budget exhaustion | 110.0 | 8 | 1 |
 
 ### Concurrent 8 MiB × 8 peak
 

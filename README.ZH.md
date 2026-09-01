@@ -128,31 +128,31 @@ Release 会返回以下状态之一：
 
 ## Benchmark 结果
 
-以下数据来自 Windows/amd64、Go 1.26.7、AMD Ryzen 9 8945HX。每个稳态组使用 10 个样本和 `-benchtime=1s -cpu=1,8`。下表展示 CPU=1 的结果，并且只比较表中明确列出的 workload。
+以下数据来自 Windows/amd64、Go 1.26.7、AMD Ryzen 9 8945HX。两个固定尺寸表使用 10 个样本和 `-benchtime=1s -cpu=1,8`；生命周期表使用 10 个样本和 `-benchtime=20x -cpu=1,8`。下表展示 CPU=1 的结果，并且只比较表中明确列出的 workload。
 
 ### Raw requested-length API — 1 KiB
 
 | 对比项 | ns/op | B/op | allocs/op |
 | --- | ---: | ---: | ---: |
-| `make` | 175.9 | 1024 | 1 |
-| 带 cutoff 的 `sync.Pool` | 25.62 | 0 | 0 |
-| Project Fast Lease | 69.58 | 0 | 0 |
-| Project Fast Raw | 67.47 | 0 | 0 |
-| Project Bounded Raw | 56.73 | 0 | 0 |
-| libp2p v0.1.0 | 45.25 | 0 | 0 |
-| gRPC v1.83.2，acquire 时清零 | 42.88 | 0 | 0 |
-| Prometheus v0.314.0 | 123.8 | 48 | 2 |
+| `make` | 174.0 | 1024 | 1 |
+| 带 cutoff 的 `sync.Pool` | 24.59 | 0 | 0 |
+| Project Fast Lease | 71.77 | 0 | 0 |
+| Project Fast Raw | 65.29 | 0 | 0 |
+| Project Bounded Raw | 58.47 | 0 | 0 |
+| libp2p v0.1.0 | 48.06 | 0 | 0 |
+| gRPC v1.83.2，acquire 时清零 | 47.18 | 0 | 0 |
+| Prometheus v0.314.0 | 135.8 | 48 | 2 |
 
 ### Append Buffer — 以 128-byte chunks 写入 16 KiB
 
 | 对比项 | µs/op | B/op | allocs/op |
 | --- | ---: | ---: | ---: |
-| 新建 `bytes.Buffer` | 3.177 | 32.02 KiB | 10 |
-| 带 cutoff 的 pooled `bytes.Buffer` | 1.552 | 96 | 1 |
-| valyala v1.0.0 | 1.439 | 96 | 1 |
-| bpool SizedBufferPool | 6.010 | 28.14 KiB | 5 |
-| Project Fast Buffer | 3.504 | 96 | 1 |
-| Project Bounded Buffer | 3.402 | 96 | 1 |
+| 新建 `bytes.Buffer` | 7.502 | 32.02 KiB | 10 |
+| 带 cutoff 的 pooled `bytes.Buffer` | 1.756 | 96 | 1 |
+| valyala v1.0.0 | 1.568 | 96 | 1 |
+| bpool SizedBufferPool | 6.618 | 28.14 KiB | 5 |
+| Project Fast Buffer | 3.763 | 96 | 1 |
+| Project Bounded Buffer | 3.882 | 96 | 1 |
 
 本项目在这些 workload 中并非全面最快。它的主要差异是确定性容量、显式所有权、旧 Generation 拒绝，以及可选的精确 Retained Capacity 预算。
 
@@ -160,10 +160,10 @@ Release 会返回以下状态之一：
 
 | 状态 | ns/op | B/op | allocs/op |
 | --- | ---: | ---: | ---: |
-| Cold | 1,435 | 1,378 | 4 |
-| Warm | 70.0 | 0 | 0 |
-| PostGC | 982.5 | 354 | 5 |
-| Bounded 两次 Release 预算耗尽 | 247.5 | 8 | 1 |
+| Cold | 712.5 | 1,378 | 4 |
+| Warm | 32.50 | 0 | 0 |
+| PostGC | 502.5 | 353 | 5 |
+| Bounded 两次 Release 预算耗尽 | 110.0 | 8 | 1 |
 
 ### 并发 8 MiB × 8 峰值
 

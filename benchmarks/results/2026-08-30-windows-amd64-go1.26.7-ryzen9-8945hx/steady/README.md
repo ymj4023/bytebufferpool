@@ -1,6 +1,6 @@
 # Steady-state Benchmark evidence
 
-Generated on 2026-09-01 from source revision `bda31718064b241fe8e9b954be8691fa6dfa8c66`.
+Generated on 2026-09-01 from source revision `498bb481121dc159d043f2dba23ec0e43b18f42a`.
 
 The environment matches the parent directory: Windows/amd64, Go 1.26.7, AMD Ryzen 9 8945HX, 32 logical CPUs. Each group uses `-benchmem -benchtime=1s -count=10 -cpu=1,8`.
 

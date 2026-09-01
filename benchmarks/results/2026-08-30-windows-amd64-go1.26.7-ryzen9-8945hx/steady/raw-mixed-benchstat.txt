@@ -4,59 +4,59 @@ pkg: github.com/ymj4023/bytebufferpool/benchmarks
 cpu: AMD Ryzen 9 8945HX with Radeon Graphics
                                       │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\raw-mixed.txt │
                                       │                                                        sec/op                                                         │
-RawMixed/Make                                                                                                                                    1.460µ ± 23%
-RawMixed/Make-8                                                                                                                                  2.360µ ± 25%
-RawMixed/sync.Pool/Naive                                                                                                                         23.55n ±  1%
-RawMixed/sync.Pool/Naive-8                                                                                                                       23.76n ±  1%
-RawMixed/sync.Pool/Cutoff                                                                                                                        25.23n ±  1%
-RawMixed/sync.Pool/Cutoff-8                                                                                                                      25.45n ±  0%
-RawMixed/Project/Fast/Lease                                                                                                                      68.13n ±  0%
-RawMixed/Project/Fast/Lease-8                                                                                                                    68.49n ±  0%
-RawMixed/Project/Fast/Raw                                                                                                                        61.99n ±  1%
-RawMixed/Project/Fast/Raw-8                                                                                                                      62.11n ±  3%
-RawMixed/Project/Bounded/Raw                                                                                                                     56.62n ±  0%
-RawMixed/Project/Bounded/Raw-8                                                                                                                   57.87n ±  1%
-RawMixed/Project/Fast/RawZero                                                                                                                    339.9n ±  2%
-RawMixed/Project/Fast/RawZero-8                                                                                                                  341.9n ±  1%
-RawMixed/Project/Fast/RawValidation                                                                                                              7.707µ ±  0%
-RawMixed/Project/Fast/RawValidation-8                                                                                                            7.704µ ±  0%
-RawMixed/Project/Fast/RawStats                                                                                                                   65.80n ±  1%
-RawMixed/Project/Fast/RawStats-8                                                                                                                 65.93n ±  0%
-RawMixed/libp2p/v0.1.0                                                                                                                           44.96n ±  0%
-RawMixed/libp2p/v0.1.0-8                                                                                                                         45.36n ±  0%
-RawMixed/gRPC/v1.83.2/ZeroOnAcquire                                                                                                              334.9n ±  1%
-RawMixed/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                            323.1n ±  2%
-RawMixed/Prometheus/v0.314.0                                                                                                                     120.7n ±  4%
-RawMixed/Prometheus/v0.314.0-8                                                                                                                   110.5n ±  3%
-geomean                                                                                                                                          144.1n
+RawMixed/Make                                                                                                                                    1.545µ ± 13%
+RawMixed/Make-8                                                                                                                                  2.925µ ± 23%
+RawMixed/sync.Pool/Naive                                                                                                                         25.88n ±  2%
+RawMixed/sync.Pool/Naive-8                                                                                                                       25.99n ±  2%
+RawMixed/sync.Pool/Cutoff                                                                                                                        25.05n ±  2%
+RawMixed/sync.Pool/Cutoff-8                                                                                                                      25.61n ±  2%
+RawMixed/Project/Fast/Lease                                                                                                                      67.88n ±  1%
+RawMixed/Project/Fast/Lease-8                                                                                                                    68.25n ±  1%
+RawMixed/Project/Fast/Raw                                                                                                                        66.95n ±  3%
+RawMixed/Project/Fast/Raw-8                                                                                                                      66.04n ±  1%
+RawMixed/Project/Bounded/Raw                                                                                                                     59.12n ±  3%
+RawMixed/Project/Bounded/Raw-8                                                                                                                   58.42n ±  2%
+RawMixed/Project/Fast/RawZero                                                                                                                    357.4n ±  2%
+RawMixed/Project/Fast/RawZero-8                                                                                                                  361.5n ±  2%
+RawMixed/Project/Fast/RawValidation                                                                                                              16.68µ ±  2%
+RawMixed/Project/Fast/RawValidation-8                                                                                                            16.53µ ±  2%
+RawMixed/Project/Fast/RawStats                                                                                                                   69.44n ±  2%
+RawMixed/Project/Fast/RawStats-8                                                                                                                 70.10n ±  5%
+RawMixed/libp2p/v0.1.0                                                                                                                           49.34n ±  2%
+RawMixed/libp2p/v0.1.0-8                                                                                                                         50.34n ±  2%
+RawMixed/gRPC/v1.83.2/ZeroOnAcquire                                                                                                              333.1n ±  2%
+RawMixed/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                            336.2n ±  2%
+RawMixed/Prometheus/v0.314.0                                                                                                                     130.4n ±  1%
+RawMixed/Prometheus/v0.314.0-8                                                                                                                   130.9n ±  4%
+geomean                                                                                                                                          162.4n
 
                                       │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\raw-mixed.txt │
                                       │                                                          B/s                                                          │
-RawMixed/Make                                                                                                                                   11.20Gi ± 19%
-RawMixed/Make-8                                                                                                                                 6.944Gi ± 32%
-RawMixed/sync.Pool/Naive                                                                                                                        694.6Gi ±  0%
-RawMixed/sync.Pool/Naive-8                                                                                                                      688.4Gi ±  1%
-RawMixed/sync.Pool/Cutoff                                                                                                                       648.1Gi ±  1%
-RawMixed/sync.Pool/Cutoff-8                                                                                                                     642.7Gi ±  0%
-RawMixed/Project/Fast/Lease                                                                                                                     240.0Gi ±  0%
-RawMixed/Project/Fast/Lease-8                                                                                                                   238.8Gi ±  0%
-RawMixed/Project/Fast/Raw                                                                                                                       263.9Gi ±  1%
-RawMixed/Project/Fast/Raw-8                                                                                                                     263.3Gi ±  3%
-RawMixed/Project/Bounded/Raw                                                                                                                    288.9Gi ±  0%
-RawMixed/Project/Bounded/Raw-8                                                                                                                  282.6Gi ±  1%
-RawMixed/Project/Fast/RawZero                                                                                                                   48.12Gi ±  2%
-RawMixed/Project/Fast/RawZero-8                                                                                                                 47.83Gi ±  1%
-RawMixed/Project/Fast/RawValidation                                                                                                             2.122Gi ±  0%
-RawMixed/Project/Fast/RawValidation-8                                                                                                           2.123Gi ±  0%
-RawMixed/Project/Fast/RawStats                                                                                                                  248.6Gi ±  1%
-RawMixed/Project/Fast/RawStats-8                                                                                                                248.1Gi ±  0%
-RawMixed/libp2p/v0.1.0                                                                                                                          363.8Gi ±  0%
-RawMixed/libp2p/v0.1.0-8                                                                                                                        360.6Gi ±  0%
-RawMixed/gRPC/v1.83.2/ZeroOnAcquire                                                                                                             48.82Gi ±  1%
-RawMixed/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                           50.62Gi ±  2%
-RawMixed/Prometheus/v0.314.0                                                                                                                    135.6Gi ±  4%
-RawMixed/Prometheus/v0.314.0-8                                                                                                                  148.0Gi ±  3%
-geomean                                                                                                                                         113.5Gi
+RawMixed/Make                                                                                                                                   10.58Gi ± 12%
+RawMixed/Make-8                                                                                                                                 5.592Gi ± 30%
+RawMixed/sync.Pool/Naive                                                                                                                        632.2Gi ±  2%
+RawMixed/sync.Pool/Naive-8                                                                                                                      629.4Gi ±  2%
+RawMixed/sync.Pool/Cutoff                                                                                                                       652.9Gi ±  2%
+RawMixed/sync.Pool/Cutoff-8                                                                                                                     638.7Gi ±  2%
+RawMixed/Project/Fast/Lease                                                                                                                     241.0Gi ±  1%
+RawMixed/Project/Fast/Lease-8                                                                                                                   239.6Gi ±  1%
+RawMixed/Project/Fast/Raw                                                                                                                       244.3Gi ±  3%
+RawMixed/Project/Fast/Raw-8                                                                                                                     247.7Gi ±  1%
+RawMixed/Project/Bounded/Raw                                                                                                                    276.7Gi ±  3%
+RawMixed/Project/Bounded/Raw-8                                                                                                                  279.9Gi ±  2%
+RawMixed/Project/Fast/RawZero                                                                                                                   45.77Gi ±  2%
+RawMixed/Project/Fast/RawZero-8                                                                                                                 45.24Gi ±  2%
+RawMixed/Project/Fast/RawValidation                                                                                                            1004.2Mi ±  2%
+RawMixed/Project/Fast/RawValidation-8                                                                                                          1013.1Mi ±  2%
+RawMixed/Project/Fast/RawStats                                                                                                                  235.5Gi ±  2%
+RawMixed/Project/Fast/RawStats-8                                                                                                                233.3Gi ±  5%
+RawMixed/libp2p/v0.1.0                                                                                                                          331.5Gi ±  2%
+RawMixed/libp2p/v0.1.0-8                                                                                                                        324.9Gi ±  2%
+RawMixed/gRPC/v1.83.2/ZeroOnAcquire                                                                                                             49.11Gi ±  2%
+RawMixed/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                           48.66Gi ±  2%
+RawMixed/Prometheus/v0.314.0                                                                                                                    125.4Gi ±  1%
+RawMixed/Prometheus/v0.314.0-8                                                                                                                  125.0Gi ±  4%
+geomean                                                                                                                                         100.7Gi
 
                                       │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\raw-mixed.txt │
                                       │                                                         B/op                                                          │
@@ -75,7 +75,7 @@ RawMixed/Project/Bounded/Raw-8                                                  
 RawMixed/Project/Fast/RawZero                                                                                                                   0.000 ±  0%
 RawMixed/Project/Fast/RawZero-8                                                                                                                 0.000 ±  0%
 RawMixed/Project/Fast/RawValidation                                                                                                             0.000 ±  0%
-RawMixed/Project/Fast/RawValidation-8                                                                                                           14.00 ± 50%
+RawMixed/Project/Fast/RawValidation-8                                                                                                           30.00 ± 53%
 RawMixed/Project/Fast/RawStats                                                                                                                  0.000 ±  0%
 RawMixed/Project/Fast/RawStats-8                                                                                                                0.000 ±  0%
 RawMixed/libp2p/v0.1.0                                                                                                                          0.000 ±  0%
@@ -83,7 +83,7 @@ RawMixed/libp2p/v0.1.0-8                                                        
 RawMixed/gRPC/v1.83.2/ZeroOnAcquire                                                                                                             0.000 ±  0%
 RawMixed/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                           0.000 ±  0%
 RawMixed/Prometheus/v0.314.0                                                                                                                    48.00 ±  0%
-RawMixed/Prometheus/v0.314.0-8                                                                                                                  66.00 ±  2%
+RawMixed/Prometheus/v0.314.0-8                                                                                                                  68.00 ±  1%
 geomean                                                                                                                                                     ¹
 ¹ summaries must be >0 to compute geomean
 

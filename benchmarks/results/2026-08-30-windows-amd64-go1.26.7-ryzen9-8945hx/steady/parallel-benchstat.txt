@@ -4,52 +4,52 @@ pkg: github.com/ymj4023/bytebufferpool/benchmarks
 cpu: AMD Ryzen 9 8945HX with Radeon Graphics
                                                │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\parallel.txt │
                                                │                                                        sec/op                                                        │
-RawParallel/Make-8                                                                                                                                       324.8n ± ∞ ¹
-RawParallel/sync.Pool/Naive-8                                                                                                                            24.98n ± ∞ ¹
-RawParallel/sync.Pool/Cutoff-8                                                                                                                           25.66n ± ∞ ¹
-RawParallel/Project/Fast/Lease-8                                                                                                                         29.18n ± ∞ ¹
-RawParallel/Project/Fast/Raw-8                                                                                                                           27.74n ± ∞ ¹
-RawParallel/Project/Bounded/Raw-8                                                                                                                        256.7n ± ∞ ¹
-RawParallel/Project/Fast/RawZero-8                                                                                                                       29.70n ± ∞ ¹
-RawParallel/Project/Fast/RawValidation-8                                                                                                                 687.3n ± ∞ ¹
-RawParallel/Project/Fast/RawStats-8                                                                                                                      83.49n ± ∞ ¹
-RawParallel/libp2p/v0.1.0-8                                                                                                                              28.79n ± ∞ ¹
-RawParallel/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                                 28.58n ± ∞ ¹
-RawParallel/Prometheus/v0.314.0-8                                                                                                                        56.46n ± ∞ ¹
-BufferParallel/bytes.Buffer/New-8                                                                                                                        11.52µ ± ∞ ¹
-BufferParallel/sync.Pool/bytes.Buffer/Naive-8                                                                                                            482.4n ± ∞ ¹
-BufferParallel/sync.Pool/bytes.Buffer/Cutoff-8                                                                                                           505.7n ± ∞ ¹
-BufferParallel/valyala/v1.0.0-8                                                                                                                          602.1n ± ∞ ¹
-BufferParallel/bpool/BufferPool-8                                                                                                                        727.2n ± ∞ ¹
-BufferParallel/bpool/SizedBufferPool-8                                                                                                                   9.122µ ± ∞ ¹
-BufferParallel/Project/Fast/Buffer-8                                                                                                                     866.9n ± ∞ ¹
-BufferParallel/Project/Bounded/Buffer-8                                                                                                                  3.157µ ± ∞ ¹
-geomean                                                                                                                                                  224.4n
+RawParallel/Make-8                                                                                                                                       291.4n ± ∞ ¹
+RawParallel/sync.Pool/Naive-8                                                                                                                            6.990n ± ∞ ¹
+RawParallel/sync.Pool/Cutoff-8                                                                                                                           7.000n ± ∞ ¹
+RawParallel/Project/Fast/Lease-8                                                                                                                         12.21n ± ∞ ¹
+RawParallel/Project/Fast/Raw-8                                                                                                                           12.46n ± ∞ ¹
+RawParallel/Project/Bounded/Raw-8                                                                                                                        222.4n ± ∞ ¹
+RawParallel/Project/Fast/RawZero-8                                                                                                                       15.60n ± ∞ ¹
+RawParallel/Project/Fast/RawValidation-8                                                                                                                 666.9n ± ∞ ¹
+RawParallel/Project/Fast/RawStats-8                                                                                                                      77.72n ± ∞ ¹
+RawParallel/libp2p/v0.1.0-8                                                                                                                              10.04n ± ∞ ¹
+RawParallel/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                                 10.97n ± ∞ ¹
+RawParallel/Prometheus/v0.314.0-8                                                                                                                        48.71n ± ∞ ¹
+BufferParallel/bytes.Buffer/New-8                                                                                                                        10.93µ ± ∞ ¹
+BufferParallel/sync.Pool/bytes.Buffer/Naive-8                                                                                                            462.4n ± ∞ ¹
+BufferParallel/sync.Pool/bytes.Buffer/Cutoff-8                                                                                                           449.5n ± ∞ ¹
+BufferParallel/valyala/v1.0.0-8                                                                                                                          587.3n ± ∞ ¹
+BufferParallel/bpool/BufferPool-8                                                                                                                        658.2n ± ∞ ¹
+BufferParallel/bpool/SizedBufferPool-8                                                                                                                   8.760µ ± ∞ ¹
+BufferParallel/Project/Fast/Buffer-8                                                                                                                     885.1n ± ∞ ¹
+BufferParallel/Project/Bounded/Buffer-8                                                                                                                  1.992µ ± ∞ ¹
+geomean                                                                                                                                                  148.8n
 ¹ need >= 6 samples for confidence interval at level 0.95
 
                                                │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\parallel.txt │
                                                │                                                         B/s                                                          │
-RawParallel/Make-8                                                                                                                                      2.936Gi ± ∞ ¹
-RawParallel/sync.Pool/Naive-8                                                                                                                           38.18Gi ± ∞ ¹
-RawParallel/sync.Pool/Cutoff-8                                                                                                                          37.16Gi ± ∞ ¹
-RawParallel/Project/Fast/Lease-8                                                                                                                        32.68Gi ± ∞ ¹
-RawParallel/Project/Fast/Raw-8                                                                                                                          34.38Gi ± ∞ ¹
-RawParallel/Project/Bounded/Raw-8                                                                                                                       3.715Gi ± ∞ ¹
-RawParallel/Project/Fast/RawZero-8                                                                                                                      32.11Gi ± ∞ ¹
-RawParallel/Project/Fast/RawValidation-8                                                                                                                1.388Gi ± ∞ ¹
-RawParallel/Project/Fast/RawStats-8                                                                                                                     11.42Gi ± ∞ ¹
-RawParallel/libp2p/v0.1.0-8                                                                                                                             33.13Gi ± ∞ ¹
-RawParallel/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                                33.37Gi ± ∞ ¹
-RawParallel/Prometheus/v0.314.0-8                                                                                                                       16.89Gi ± ∞ ¹
-BufferParallel/bytes.Buffer/New-8                                                                                                                       1.324Gi ± ∞ ¹
-BufferParallel/sync.Pool/bytes.Buffer/Naive-8                                                                                                           31.63Gi ± ∞ ¹
-BufferParallel/sync.Pool/bytes.Buffer/Cutoff-8                                                                                                          30.18Gi ± ∞ ¹
-BufferParallel/valyala/v1.0.0-8                                                                                                                         25.34Gi ± ∞ ¹
-BufferParallel/bpool/BufferPool-8                                                                                                                       20.98Gi ± ∞ ¹
-BufferParallel/bpool/SizedBufferPool-8                                                                                                                  1.673Gi ± ∞ ¹
-BufferParallel/Project/Fast/Buffer-8                                                                                                                    17.60Gi ± ∞ ¹
-BufferParallel/Project/Bounded/Buffer-8                                                                                                                 4.833Gi ± ∞ ¹
-geomean                                                                                                                                                 12.88Gi
+RawParallel/Make-8                                                                                                                                      3.272Gi ± ∞ ¹
+RawParallel/sync.Pool/Naive-8                                                                                                                           136.4Gi ± ∞ ¹
+RawParallel/sync.Pool/Cutoff-8                                                                                                                          136.2Gi ± ∞ ¹
+RawParallel/Project/Fast/Lease-8                                                                                                                        78.11Gi ± ∞ ¹
+RawParallel/Project/Fast/Raw-8                                                                                                                          76.52Gi ± ∞ ¹
+RawParallel/Project/Bounded/Raw-8                                                                                                                       4.288Gi ± ∞ ¹
+RawParallel/Project/Fast/RawZero-8                                                                                                                      61.13Gi ± ∞ ¹
+RawParallel/Project/Fast/RawValidation-8                                                                                                                1.430Gi ± ∞ ¹
+RawParallel/Project/Fast/RawStats-8                                                                                                                     12.27Gi ± ∞ ¹
+RawParallel/libp2p/v0.1.0-8                                                                                                                             94.98Gi ± ∞ ¹
+RawParallel/gRPC/v1.83.2/ZeroOnAcquire-8                                                                                                                86.92Gi ± ∞ ¹
+RawParallel/Prometheus/v0.314.0-8                                                                                                                       19.58Gi ± ∞ ¹
+BufferParallel/bytes.Buffer/New-8                                                                                                                       1.396Gi ± ∞ ¹
+BufferParallel/sync.Pool/bytes.Buffer/Naive-8                                                                                                           33.00Gi ± ∞ ¹
+BufferParallel/sync.Pool/bytes.Buffer/Cutoff-8                                                                                                          33.95Gi ± ∞ ¹
+BufferParallel/valyala/v1.0.0-8                                                                                                                         25.98Gi ± ∞ ¹
+BufferParallel/bpool/BufferPool-8                                                                                                                       23.18Gi ± ∞ ¹
+BufferParallel/bpool/SizedBufferPool-8                                                                                                                  1.742Gi ± ∞ ¹
+BufferParallel/Project/Fast/Buffer-8                                                                                                                    17.24Gi ± ∞ ¹
+BufferParallel/Project/Bounded/Buffer-8                                                                                                                 7.658Gi ± ∞ ¹
+geomean                                                                                                                                                 19.43Gi
 ¹ need >= 6 samples for confidence interval at level 0.95
 
                                                │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\parallel.txt │
@@ -69,7 +69,7 @@ RawParallel/Prometheus/v0.314.0-8                                               
 BufferParallel/bytes.Buffer/New-8                                                                                                                       32.02Ki ± ∞ ¹
 BufferParallel/sync.Pool/bytes.Buffer/Naive-8                                                                                                             98.00 ± ∞ ¹
 BufferParallel/sync.Pool/bytes.Buffer/Cutoff-8                                                                                                            98.00 ± ∞ ¹
-BufferParallel/valyala/v1.0.0-8                                                                                                                           97.00 ± ∞ ¹
+BufferParallel/valyala/v1.0.0-8                                                                                                                           96.00 ± ∞ ¹
 BufferParallel/bpool/BufferPool-8                                                                                                                         96.00 ± ∞ ¹
 BufferParallel/bpool/SizedBufferPool-8                                                                                                                  28.14Ki ± ∞ ¹
 BufferParallel/Project/Fast/Buffer-8                                                                                                                      98.00 ± ∞ ¹
