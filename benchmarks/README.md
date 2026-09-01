@@ -30,6 +30,12 @@ Collect repeated steady-state samples:
 go test -run '^$' -bench 'Benchmark(RawFixed|RawMixed|RawParallel|BufferFixed|BufferParallel)$' -benchmem -benchtime=3s -count=10 -cpu=1,8
 ```
 
+Collect explicit lifecycle and budget samples with setup and GC outside timed regions:
+
+```text
+go test -run '^$' -bench '^(BenchmarkRawLifecycle|BenchmarkBoundedBudgetExhaustion)$' -benchmem -benchtime=20x -count=10 -cpu=1,8
+```
+
 Record the complete Go version, GOOS/GOARCH, CPU, logical core count, GOMAXPROCS, GOGC, memory limit, project commit, and dependency versions beside every published result.
 
 ## Isolated-process memory suite

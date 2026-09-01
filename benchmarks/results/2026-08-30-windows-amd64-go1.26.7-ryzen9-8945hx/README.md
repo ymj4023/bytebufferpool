@@ -1,10 +1,10 @@
 # Peak-memory evidence — Windows amd64
 
-This directory contains isolated-process memory evidence generated on 2026-08-30.
+This directory contains isolated-process memory evidence regenerated on 2026-09-01.
 
 ## Environment
 
-- Project revision: `8b95e892e8abcaf01abc52fc96a55f0a89df1266`
+- Project revision: `bda31718064b241fe8e9b954be8691fa6dfa8c66`
 - Working tree at build time: clean (`vcs.modified=false`)
 - Go: `go1.26.7`
 - GOOS/GOARCH: `windows/amd64`

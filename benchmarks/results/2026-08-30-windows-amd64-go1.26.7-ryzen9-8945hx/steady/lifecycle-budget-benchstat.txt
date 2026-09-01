@@ -1,0 +1,53 @@
+goos: windows
+goarch: amd64
+pkg: github.com/ymj4023/bytebufferpool/benchmarks
+cpu: AMD Ryzen 9 8945HX with Radeon Graphics
+                                       │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\lifecycle-budget.txt │
+                                       │                                                            sec/op                                                            │
+RawLifecycle/Cold/Project/Fast/Raw                                                                                                                       1.435µ ± 44%
+RawLifecycle/Cold/Project/Fast/Raw-8                                                                                                                     2.960µ ± 40%
+RawLifecycle/Warm/Project/Fast/Raw                                                                                                                       70.00n ±  7%
+RawLifecycle/Warm/Project/Fast/Raw-8                                                                                                                     77.50n ± 10%
+RawLifecycle/PostGC/Project/Fast/Raw                                                                                                                     982.5n ± 24%
+RawLifecycle/PostGC/Project/Fast/Raw-8                                                                                                                   3.275µ ± 57%
+BoundedBudgetExhaustion                                                                                                                                  247.5n ± 13%
+BoundedBudgetExhaustion-8                                                                                                                                535.0n ± 51%
+geomean                                                                                                                                                  561.1n
+
+                                       │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\lifecycle-budget.txt │
+                                       │                                                             B/s                                                              │
+RawLifecycle/Cold/Project/Fast/Raw                                                                                                                      688.1Mi ± 77%
+RawLifecycle/Cold/Project/Fast/Raw-8                                                                                                                    331.2Mi ± 65%
+RawLifecycle/Warm/Project/Fast/Raw                                                                                                                      13.62Gi ±  8%
+RawLifecycle/Warm/Project/Fast/Raw-8                                                                                                                    12.32Gi ± 11%
+RawLifecycle/PostGC/Project/Fast/Raw                                                                                                                    994.5Mi ± 19%
+RawLifecycle/PostGC/Project/Fast/Raw-8                                                                                                                  298.6Mi ± 36%
+BoundedBudgetExhaustion                                                                                                                                 493.3Mi ± 12%
+BoundedBudgetExhaustion-8                                                                                                                               228.2Mi ± 34%
+geomean                                                                                                                                                 1.013Gi
+
+                                       │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\lifecycle-budget.txt │
+                                       │                                                             B/op                                                             │
+RawLifecycle/Cold/Project/Fast/Raw                                                                                                                     1.346Ki ± 0%
+RawLifecycle/Cold/Project/Fast/Raw-8                                                                                                                   3.346Ki ± 0%
+RawLifecycle/Warm/Project/Fast/Raw                                                                                                                       0.000 ± 0%
+RawLifecycle/Warm/Project/Fast/Raw-8                                                                                                                     0.000 ± 0%
+RawLifecycle/PostGC/Project/Fast/Raw                                                                                                                     354.0 ± 0%
+RawLifecycle/PostGC/Project/Fast/Raw-8                                                                                                                 3.131Ki ± 3%
+BoundedBudgetExhaustion                                                                                                                                  8.000 ± 0%
+BoundedBudgetExhaustion-8                                                                                                                                8.000 ± 0%
+geomean                                                                                                                                                             ¹
+¹ summaries must be >0 to compute geomean
+
+                                       │ D:\ymj\gitwork\bytebufferpool\benchmarks\results\2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx\steady\lifecycle-budget.txt │
+                                       │                                                          allocs/op                                                           │
+RawLifecycle/Cold/Project/Fast/Raw                                                                                                                       4.000 ± 0%
+RawLifecycle/Cold/Project/Fast/Raw-8                                                                                                                     4.000 ± 0%
+RawLifecycle/Warm/Project/Fast/Raw                                                                                                                       0.000 ± 0%
+RawLifecycle/Warm/Project/Fast/Raw-8                                                                                                                     0.000 ± 0%
+RawLifecycle/PostGC/Project/Fast/Raw                                                                                                                     5.000 ± 0%
+RawLifecycle/PostGC/Project/Fast/Raw-8                                                                                                                   6.000 ± 0%
+BoundedBudgetExhaustion                                                                                                                                  1.000 ± 0%
+BoundedBudgetExhaustion-8                                                                                                                                1.000 ± 0%
+geomean                                                                                                                                                             ¹
+¹ summaries must be >0 to compute geomean
