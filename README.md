@@ -173,10 +173,10 @@ The project is not universally fastest in these workloads. Its distinguishing be
 | Project Fast | 64.67 MiB | 64.68 MiB | 0.66 MiB | unavailable |
 | Project Bounded | 64.67 MiB | 64.68 MiB | 0.67 MiB | 1 KiB |
 | libp2p v0.1.0 | 64.68 MiB | 64.69 MiB | 0.67 MiB | unavailable |
-| gRPC v1.83.2 | 64.65 MiB | 64.66 MiB | 0.65 MiB | unavailable |
-| Prometheus v0.314.0 | 65.05 MiB | 64.82 MiB | 0.66 MiB | unavailable |
+| gRPC v1.83.2 | 64.66 MiB | 64.67 MiB | 0.66 MiB | unavailable |
+| Prometheus v0.314.0 | 64.82 MiB | 64.82 MiB | 0.66 MiB | unavailable |
 
-The peak-memory suite ran 11 contenders in fresh child processes, three repetitions each. It stores 33 raw results, 66 phase summaries, and 33 GC2 heap profiles, all bound to clean revision `bda31718064b241fe8e9b954be8691fa6dfa8c66`. Bounded retained 1 KiB of steady idle storage and never exceeded its 32 MiB budget; runtime heap measurements remain separate from Pool inventory.
+The peak-memory suite ran 11 contenders in fresh child processes, three repetitions each. It stores 33 raw results, 66 phase summaries, and 33 GC2 heap profiles, all bound to clean revision `a433aa511f19328771019507f3e9fd622a796bb4`. Bounded retained 1 KiB of steady idle storage and never exceeded its 32 MiB budget; runtime heap measurements remain separate from Pool inventory.
 
 - [Steady-state raw output and benchstat summaries](./benchmarks/results/2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx/steady/README.md)
 - [Peak-memory raw results and profiles](./benchmarks/results/2026-08-30-windows-amd64-go1.26.7-ryzen9-8945hx/README.md)

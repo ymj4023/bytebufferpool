@@ -4,7 +4,7 @@ This directory contains isolated-process memory evidence regenerated on 2026-09-
 
 ## Environment
 
-- Project revision: `bda31718064b241fe8e9b954be8691fa6dfa8c66`
+- Project revision: `a433aa511f19328771019507f3e9fd622a796bb4`
 - Working tree at build time: clean (`vcs.modified=false`)
 - Go: `go1.26.7`
 - GOOS/GOARCH: `windows/amd64`
