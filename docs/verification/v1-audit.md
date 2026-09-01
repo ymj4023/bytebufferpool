@@ -108,7 +108,7 @@ This audit maps Spec Issue #1 to authoritative implementation, tests, documentat
 - Fuzz smoke: `FuzzPoolConfiguration` ran about 2.8 million executions; `FuzzBufferOperations` ran about 335 thousand executions without failure.
 - CI repeatedly passed Go 1.22 tests/vet, stable tests/vet, and Linux race detection.
 - CI Benchmark job passed adapter contracts, all-Benchmark one-iteration smoke, and all-contender isolated memory smoke.
-- Steady evidence: 240 Raw 1 KiB, 240 Raw mixed, 160 Buffer 16 KiB, 1620 boundary, 100 parallel, and 80 lifecycle/budget samples, each group with locked benchstat summaries.
+- Steady evidence: 240 Raw 1 KiB, 240 Raw mixed, 160 Buffer 16 KiB, 3240 boundary, 120 parallel, and 80 lifecycle/budget samples, each group with locked benchstat summaries and at least six samples per benchmark name.
 - Peak evidence: 33 isolated raw results, 66 phase summaries, and 33 GC2 heap profiles bound to clean revision `a433aa511f19328771019507f3e9fd622a796bb4`.
 - All Context and ADR leaves are reachable from the root cascading maps.
 - Every repository Markdown local link resolves.
