@@ -114,21 +114,25 @@ func BenchmarkBufferPostCutoffGrowth(b *testing.B) {
 			pool := mustPool(bytebufferpool.DefaultConfig(bytebufferpool.Fast))
 			b.ReportAllocs()
 			b.SetBytes(int64(size))
+			var sink uint64
 			for range b.N {
 				buffer := pool.Buffer(0)
 				writeBufferChunks(b, &buffer, chunk, size)
-				benchmarkSink.Add(uint64(buffer.Len()))
+				sink ^= uint64(buffer.Len())
 				buffer.Release()
 			}
+			benchmarkSink.Add(sink)
 		})
 		b.Run(fmt.Sprintf("%d/bytes.Buffer/New", size), func(b *testing.B) {
 			b.ReportAllocs()
 			b.SetBytes(int64(size))
+			var sink uint64
 			for range b.N {
 				var buffer bytes.Buffer
 				writeStandardBufferChunks(b, &buffer, chunk, size)
-				benchmarkSink.Add(uint64(buffer.Len()))
+				sink ^= uint64(buffer.Len())
 			}
+			benchmarkSink.Add(sink)
 		})
 	}
 }
@@ -140,25 +144,29 @@ func BenchmarkBufferReadFromPostCutoff(b *testing.B) {
 		pool := mustPool(bytebufferpool.DefaultConfig(bytebufferpool.Fast))
 		b.ReportAllocs()
 		b.SetBytes(size)
+		var sink uint64
 		for range b.N {
 			buffer := pool.Buffer(0)
 			if _, err := buffer.ReadFrom(bytes.NewReader(payload)); err != nil {
 				b.Fatalf("ReadFrom(): %v", err)
 			}
-			benchmarkSink.Add(uint64(buffer.Len()))
+			sink ^= uint64(buffer.Len())
 			buffer.Release()
 		}
+		benchmarkSink.Add(sink)
 	})
 	b.Run("bytes.Buffer/New", func(b *testing.B) {
 		b.ReportAllocs()
 		b.SetBytes(size)
+		var sink uint64
 		for range b.N {
 			var buffer bytes.Buffer
 			if _, err := buffer.ReadFrom(bytes.NewReader(payload)); err != nil {
 				b.Fatalf("ReadFrom(): %v", err)
 			}
-			benchmarkSink.Add(uint64(buffer.Len()))
+			sink ^= uint64(buffer.Len())
 		}
+		benchmarkSink.Add(sink)
 	})
 }
 

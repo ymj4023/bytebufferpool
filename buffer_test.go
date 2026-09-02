@@ -146,29 +146,65 @@ func TestBufferUnpooledGrowthRespectsAcquireLimit(t *testing.T) {
 }
 
 func TestBufferUnpooledGrowthPreservesSelfAlias(t *testing.T) {
+	for _, zeroOnRelease := range []bool{false, true} {
+		t.Run(fmt.Sprintf("zero=%t", zeroOnRelease), func(t *testing.T) {
+			pool, err := bytebufferpool.New(bytebufferpool.Config{
+				Mode:              bytebufferpool.Fast,
+				Classes:           []int{64},
+				MaxPooledCapacity: 64,
+				MaxAcquireSize:    256,
+				ZeroOnRelease:     zeroOnRelease,
+			})
+			if err != nil {
+				t.Fatalf("New(): %v", err)
+			}
+			buffer := pool.Buffer(64)
+			defer buffer.Release()
+			original := bytes.Repeat([]byte{'a'}, 40)
+			if _, err := buffer.Write(original); err != nil {
+				t.Fatalf("seed Write(): %v", err)
+			}
+
+			if _, err := buffer.Write(buffer.Bytes()); err != nil {
+				t.Fatalf("self-alias Write(): %v", err)
+			}
+			want := append(append([]byte(nil), original...), original...)
+			if !bytes.Equal(buffer.Bytes(), want) {
+				t.Fatalf("self-alias unpooled growth = len %d/cap %d/content %q; want len 80/content preserved", buffer.Len(), buffer.Cap(), buffer.Bytes())
+			}
+		})
+	}
+}
+
+func TestBufferWriteStringBeyondPoolingCutoffIsAmortized(t *testing.T) {
 	pool, err := bytebufferpool.New(bytebufferpool.Config{
 		Mode:              bytebufferpool.Fast,
 		Classes:           []int{64},
 		MaxPooledCapacity: 64,
-		MaxAcquireSize:    256,
-		ZeroOnRelease:     true,
+		MaxAcquireSize:    512,
 	})
 	if err != nil {
 		t.Fatalf("New(): %v", err)
 	}
 	buffer := pool.Buffer(64)
 	defer buffer.Release()
-	original := bytes.Repeat([]byte{'a'}, 40)
-	if _, err := buffer.Write(original); err != nil {
+	if _, err := buffer.Write(bytes.Repeat([]byte{'a'}, 64)); err != nil {
 		t.Fatalf("seed Write(): %v", err)
 	}
 
-	if _, err := buffer.Write(buffer.Bytes()); err != nil {
-		t.Fatalf("self-alias Write(): %v", err)
+	previousCapacity := buffer.Cap()
+	capacityChanges := 0
+	for range 64 {
+		if n, err := buffer.WriteString("b"); err != nil || n != 1 {
+			t.Fatalf("post-cutoff WriteString() = %d, %v; want 1, nil", n, err)
+		}
+		if buffer.Cap() != previousCapacity {
+			capacityChanges++
+			previousCapacity = buffer.Cap()
+		}
 	}
-	want := append(append([]byte(nil), original...), original...)
-	if !bytes.Equal(buffer.Bytes(), want) {
-		t.Fatalf("self-alias unpooled growth = len %d/cap %d/content %q; want len 80/content preserved", buffer.Len(), buffer.Cap(), buffer.Bytes())
+	if capacityChanges > 8 || buffer.Len() != 128 {
+		t.Fatalf("WriteString growth changed capacity %d times and produced len %d; want amortized growth and len 128", capacityChanges, buffer.Len())
 	}
 }
 

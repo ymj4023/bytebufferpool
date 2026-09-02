@@ -66,7 +66,7 @@ _, _ = buffer.Write([]byte("world"))
 _, _ = buffer.WriteTo(destination)
 ```
 
-Buffer is non-copyable, owns a Lease, and implements `io.Writer`, `io.ByteWriter`, `io.StringWriter`, `io.ReaderFrom`, and `io.WriterTo`. Growth acquires a new Lease, copies live content, and immediately releases the old Lease. When no Capacity Class can satisfy the request, Buffer reserves capacity geometrically without retaining that oversize storage; `MaxAcquireSize` still caps each acquisition. Failed growth preserves existing content.
+Buffer is non-copyable, owns a Lease, and implements `io.Writer`, `io.ByteWriter`, `io.StringWriter`, `io.ReaderFrom`, and `io.WriterTo`. Growth acquires a new Lease, copies live content, and immediately releases the old Lease. When no Capacity Class can satisfy the request, Buffer reserves capacity geometrically; the resulting unpooled Backing Storage is not retained, and `MaxAcquireSize` still caps each acquisition. Failed growth preserves existing content.
 
 ## Capacity and retention
 
