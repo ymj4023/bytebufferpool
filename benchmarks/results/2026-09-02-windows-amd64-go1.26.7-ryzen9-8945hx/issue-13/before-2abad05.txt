@@ -1,0 +1,54 @@
+goos: windows
+goarch: amd64
+pkg: github.com/ymj4023/bytebufferpool/benchmarks
+cpu: AMD Ryzen 9 8945HX with Radeon Graphics
+BenchmarkBufferPostCutoffGrowth/1048577/Project/Fast         	       1	    792900 ns/op	1322.46 MB/s	 3153688 B/op	      61 allocs/op
+BenchmarkBufferPostCutoffGrowth/1048577/Project/Fast         	       1	    705400 ns/op	1486.50 MB/s	 3153824 B/op	      63 allocs/op
+BenchmarkBufferPostCutoffGrowth/1048577/Project/Fast         	       1	    512000 ns/op	2048.00 MB/s	 3153824 B/op	      63 allocs/op
+BenchmarkBufferPostCutoffGrowth/1048577/Project/Fast         	       1	    298700 ns/op	3510.47 MB/s	 3153824 B/op	      63 allocs/op
+BenchmarkBufferPostCutoffGrowth/1048577/Project/Fast         	       1	    293000 ns/op	3578.76 MB/s	 3153824 B/op	      63 allocs/op
+BenchmarkBufferPostCutoffGrowth/1048577/Project/Fast         	       1	    386100 ns/op	2715.82 MB/s	 3153824 B/op	      63 allocs/op
+BenchmarkBufferPostCutoffGrowth/1048577/bytes.Buffer/New     	       1	    479300 ns/op	2187.73 MB/s	 4190400 B/op	      12 allocs/op
+BenchmarkBufferPostCutoffGrowth/1048577/bytes.Buffer/New     	       1	    340000 ns/op	3084.05 MB/s	 4190400 B/op	      12 allocs/op
+BenchmarkBufferPostCutoffGrowth/1048577/bytes.Buffer/New     	       1	    182100 ns/op	5758.25 MB/s	 4190400 B/op	      12 allocs/op
+BenchmarkBufferPostCutoffGrowth/1048577/bytes.Buffer/New     	       1	    203700 ns/op	5147.65 MB/s	 4190400 B/op	      12 allocs/op
+BenchmarkBufferPostCutoffGrowth/1048577/bytes.Buffer/New     	       1	    240000 ns/op	4369.07 MB/s	 4190400 B/op	      12 allocs/op
+BenchmarkBufferPostCutoffGrowth/1048577/bytes.Buffer/New     	       1	    180200 ns/op	5818.96 MB/s	 4190400 B/op	      12 allocs/op
+BenchmarkBufferPostCutoffGrowth/2097152/Project/Fast         	       1	  50819800 ns/op	  41.27 MB/s	405810920 B/op	     571 allocs/op
+BenchmarkBufferPostCutoffGrowth/2097152/Project/Fast         	       1	  47586600 ns/op	  44.07 MB/s	405810920 B/op	     571 allocs/op
+BenchmarkBufferPostCutoffGrowth/2097152/Project/Fast         	       1	  47057000 ns/op	  44.57 MB/s	405810920 B/op	     571 allocs/op
+BenchmarkBufferPostCutoffGrowth/2097152/Project/Fast         	       1	  48078300 ns/op	  43.62 MB/s	405810920 B/op	     571 allocs/op
+BenchmarkBufferPostCutoffGrowth/2097152/Project/Fast         	       1	  47818600 ns/op	  43.86 MB/s	405810920 B/op	     571 allocs/op
+BenchmarkBufferPostCutoffGrowth/2097152/Project/Fast         	       1	  47187600 ns/op	  44.44 MB/s	405810920 B/op	     571 allocs/op
+BenchmarkBufferPostCutoffGrowth/2097152/bytes.Buffer/New     	       1	    209900 ns/op	9991.20 MB/s	 4190400 B/op	      12 allocs/op
+BenchmarkBufferPostCutoffGrowth/2097152/bytes.Buffer/New     	       1	    236200 ns/op	8878.71 MB/s	 4190400 B/op	      12 allocs/op
+BenchmarkBufferPostCutoffGrowth/2097152/bytes.Buffer/New     	       1	    211000 ns/op	9939.11 MB/s	 4190400 B/op	      12 allocs/op
+BenchmarkBufferPostCutoffGrowth/2097152/bytes.Buffer/New     	       1	    213900 ns/op	9804.36 MB/s	 4190400 B/op	      12 allocs/op
+BenchmarkBufferPostCutoffGrowth/2097152/bytes.Buffer/New     	       1	    207000 ns/op	10131.17 MB/s	 4190400 B/op	      12 allocs/op
+BenchmarkBufferPostCutoffGrowth/2097152/bytes.Buffer/New     	       1	    196700 ns/op	10661.68 MB/s	 4190400 B/op	      12 allocs/op
+BenchmarkBufferPostCutoffGrowth/8388608/Project/Fast         	       1	 750205000 ns/op	  11.18 MB/s	8465239784 B/op	    3643 allocs/op
+BenchmarkBufferPostCutoffGrowth/8388608/Project/Fast         	       1	 717290100 ns/op	  11.69 MB/s	8465239784 B/op	    3643 allocs/op
+BenchmarkBufferPostCutoffGrowth/8388608/Project/Fast         	       1	 717431200 ns/op	  11.69 MB/s	8465239784 B/op	    3643 allocs/op
+BenchmarkBufferPostCutoffGrowth/8388608/Project/Fast         	       1	 715895200 ns/op	  11.72 MB/s	8465239784 B/op	    3643 allocs/op
+BenchmarkBufferPostCutoffGrowth/8388608/Project/Fast         	       1	 728288200 ns/op	  11.52 MB/s	8465239784 B/op	    3643 allocs/op
+BenchmarkBufferPostCutoffGrowth/8388608/Project/Fast         	       1	 721489400 ns/op	  11.63 MB/s	8465239784 B/op	    3643 allocs/op
+BenchmarkBufferPostCutoffGrowth/8388608/bytes.Buffer/New     	       1	   1522400 ns/op	5510.12 MB/s	16773312 B/op	      14 allocs/op
+BenchmarkBufferPostCutoffGrowth/8388608/bytes.Buffer/New     	       1	   1448400 ns/op	5791.64 MB/s	16773312 B/op	      14 allocs/op
+BenchmarkBufferPostCutoffGrowth/8388608/bytes.Buffer/New     	       1	   1417200 ns/op	5919.14 MB/s	16773312 B/op	      14 allocs/op
+BenchmarkBufferPostCutoffGrowth/8388608/bytes.Buffer/New     	       1	   1385400 ns/op	6055.01 MB/s	16773312 B/op	      14 allocs/op
+BenchmarkBufferPostCutoffGrowth/8388608/bytes.Buffer/New     	       1	   1383900 ns/op	6061.57 MB/s	16773312 B/op	      14 allocs/op
+BenchmarkBufferPostCutoffGrowth/8388608/bytes.Buffer/New     	       1	   1417100 ns/op	5919.56 MB/s	16773312 B/op	      14 allocs/op
+BenchmarkBufferReadFromPostCutoff/Project/Fast               	       1	 329986600 ns/op	   6.36 MB/s	3233918064 B/op	    4164 allocs/op
+BenchmarkBufferReadFromPostCutoff/Project/Fast               	       1	 330570300 ns/op	   6.34 MB/s	3233918064 B/op	    4164 allocs/op
+BenchmarkBufferReadFromPostCutoff/Project/Fast               	       1	 330391600 ns/op	   6.35 MB/s	3233918064 B/op	    4164 allocs/op
+BenchmarkBufferReadFromPostCutoff/Project/Fast               	       1	 330714900 ns/op	   6.34 MB/s	3233918064 B/op	    4164 allocs/op
+BenchmarkBufferReadFromPostCutoff/Project/Fast               	       1	 333707800 ns/op	   6.28 MB/s	3233918064 B/op	    4164 allocs/op
+BenchmarkBufferReadFromPostCutoff/Project/Fast               	       1	 330355900 ns/op	   6.35 MB/s	3233918064 B/op	    4164 allocs/op
+BenchmarkBufferReadFromPostCutoff/bytes.Buffer/New           	       1	    682800 ns/op	3071.40 MB/s	 8388144 B/op	      15 allocs/op
+BenchmarkBufferReadFromPostCutoff/bytes.Buffer/New           	       1	    655100 ns/op	3201.27 MB/s	 8388144 B/op	      15 allocs/op
+BenchmarkBufferReadFromPostCutoff/bytes.Buffer/New           	       1	    638300 ns/op	3285.53 MB/s	 8388144 B/op	      15 allocs/op
+BenchmarkBufferReadFromPostCutoff/bytes.Buffer/New           	       1	    639400 ns/op	3279.87 MB/s	 8388144 B/op	      15 allocs/op
+BenchmarkBufferReadFromPostCutoff/bytes.Buffer/New           	       1	    624900 ns/op	3355.98 MB/s	 8388144 B/op	      15 allocs/op
+BenchmarkBufferReadFromPostCutoff/bytes.Buffer/New           	       1	    646000 ns/op	3246.37 MB/s	 8388144 B/op	      15 allocs/op
+PASS
+ok  	github.com/ymj4023/bytebufferpool/benchmarks	7.922s

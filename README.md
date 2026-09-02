@@ -156,6 +156,18 @@ These are medians from Windows/amd64, Go 1.26.7, AMD Ryzen 9 8945HX. The two fix
 
 The project is not universally fastest in these workloads. Its distinguishing behavior is deterministic sizing, explicit ownership, stale-generation rejection, and an exact optional Retained Capacity budget.
 
+### Post-cutoff Buffer growth — Issue #13 before/after
+
+The same benchmark source was run against the released `v1.0.1` implementation (`2abad05`) and the geometric-growth fix (`6d7c473`) using Go 1.26.7 on the machine above, with six `1x` samples at CPU1.
+
+| Workload | Before B/op | After B/op | Before allocs/op | After allocs/op |
+| --- | ---: | ---: | ---: | ---: |
+| 2 MiB in 4 KiB writes | 387.011 MiB | 4.000 MiB | 571 | 63 |
+| 8 MiB in 4 KiB writes | 8073.08 MiB | 16.00 MiB | 3643 | 67 |
+| 2 MiB `ReadFrom` | 3084.105 MiB | 8.003 MiB | 4164 | 70 |
+
+At `cutoff+1`, geometric reservation increased allocation from 3.008 MiB to 4.000 MiB while timing and allocation count were unchanged within the sample. This is the deliberate space-for-amortization trade-off. [Raw output, benchstat, revisions, and reproduction steps](./benchmarks/results/2026-09-02-windows-amd64-go1.26.7-ryzen9-8945hx/issue-13/README.md) are committed.
+
 ### Lifecycle and budget — Project Fast Raw, 1 KiB
 
 | State | ns/op | B/op | allocs/op |

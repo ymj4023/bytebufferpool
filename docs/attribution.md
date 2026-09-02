@@ -6,7 +6,7 @@ Non-obvious inspired library code carries an adjacent `Design reference:` URL an
 
 | Reference | Locked version/source | License | What informed the design | Independent difference |
 | --- | --- | --- | --- | --- |
-| Go `sync.Pool` and `strings.Builder` | Go standard library | BSD-3-Clause | Runtime pool contract; self-pointer copy detection | Capacity Classes, explicit retention semantics, shared storage tokens, and Lease lifecycle are project-specific |
+| Go `sync.Pool`, `strings.Builder`, and `bytes.Buffer` | Go 1.26.7 standard library | BSD-3-Clause | Runtime pool contract; self-pointer copy detection; geometric growth to amortize repeated appends | Capacity Classes, explicit retention semantics, shared storage tokens, and Lease lifecycle are project-specific; geometric reservation applies only when no Capacity Class fits and is clamped by `MaxAcquireSize` |
 | valyala/bytebufferpool | v1.0.0 | MIT | Historical API, adaptive calibration, open failure modes, comparison target | New Lease-first API; deterministic classes; no copied implementation or compatibility layer |
 | libp2p/go-buffer-pool | v0.1.0 | MIT | Per-size runtime pools and wrapper reuse | Explicit cutoff, custom classes, Generation, Lease ownership, Bounded mode, clearing, validation, and statistics |
 | oxtoacart/bpool | commit `03653db5a59c` | Apache-2.0 | Non-blocking drop when a bounded container is full | Global byte-capacity CAS and per-class LIFO instead of channel capacity; no replacement allocation on Release |

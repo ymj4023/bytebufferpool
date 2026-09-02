@@ -1,0 +1,53 @@
+goos: windows
+goarch: amd64
+pkg: github.com/ymj4023/bytebufferpool/benchmarks
+cpu: AMD Ryzen 9 8945HX with Radeon Graphics
+                                                │ before-2abad05.txt │          after-6d7c473.txt           │
+                                                │       sec/op       │    sec/op      vs base               │
+BufferPostCutoffGrowth/1048577/Project/Fast            449.1µ ±  77%   393.6µ ± 114%        ~ (p=0.699 n=6)
+BufferPostCutoffGrowth/1048577/bytes.Buffer/New        221.9µ ± 116%   210.9µ ±  58%        ~ (p=1.000 n=6)
+BufferPostCutoffGrowth/2097152/Project/Fast          47702.6µ ±   7%   354.1µ ±  37%  -99.26% (p=0.002 n=6)
+BufferPostCutoffGrowth/2097152/bytes.Buffer/New        210.4µ ±  12%   224.8µ ±  54%        ~ (p=0.310 n=6)
+BufferPostCutoffGrowth/8388608/Project/Fast          719.460m ±   4%   1.485m ± 120%  -99.79% (p=0.002 n=6)
+BufferPostCutoffGrowth/8388608/bytes.Buffer/New        1.417m ±   7%   1.483m ±  17%        ~ (p=0.240 n=6)
+BufferReadFromPostCutoff/Project/Fast               330481.0µ ±   1%   708.1µ ±  14%  -99.79% (p=0.002 n=6)
+BufferReadFromPostCutoff/bytes.Buffer/New              642.7µ ±   6%   598.6µ ±  11%   -6.86% (p=0.041 n=6)
+geomean                                                4.645m          529.4µ         -88.60%
+
+                                                │ before-2abad05.txt │             after-6d7c473.txt              │
+                                                │        B/s         │       B/s         vs base                  │
+BufferPostCutoffGrowth/1048577/Project/Fast            2.218Gi ± 50%      2.485Gi ± 61%           ~ (p=0.699 n=6)
+BufferPostCutoffGrowth/1048577/bytes.Buffer/New        4.432Gi ± 54%      4.636Gi ± 37%           ~ (p=1.000 n=6)
+BufferPostCutoffGrowth/2097152/Project/Fast            41.93Mi ±  6%    5881.81Mi ± 30%  +13928.25% (p=0.002 n=6)
+BufferPostCutoffGrowth/2097152/bytes.Buffer/New        9.281Gi ± 11%      8.723Gi ± 35%           ~ (p=0.310 n=6)
+BufferPostCutoffGrowth/8388608/Project/Fast            11.12Mi ±  4%    5401.48Mi ± 55%  +48475.17% (p=0.002 n=6)
+BufferPostCutoffGrowth/8388608/bytes.Buffer/New        5.513Gi ±  7%      5.271Gi ± 14%           ~ (p=0.240 n=6)
+BufferReadFromPostCutoff/Project/Fast                  6.051Mi ±  1%   2824.640Mi ± 12%  +46580.06% (p=0.002 n=6)
+BufferReadFromPostCutoff/bytes.Buffer/New              3.039Gi ±  6%      3.263Gi ± 10%      +7.38% (p=0.041 n=6)
+geomean                                                513.8Mi            4.415Gi          +780.01%
+
+                                                │ before-2abad05.txt │           after-6d7c473.txt           │
+                                                │        B/op        │     B/op      vs base                 │
+BufferPostCutoffGrowth/1048577/Project/Fast             3.008Mi ± 0%   4.000Mi ± 0%  +32.99% (p=0.002 n=6)
+BufferPostCutoffGrowth/1048577/bytes.Buffer/New         3.996Mi ± 0%   3.996Mi ± 0%        ~ (p=1.000 n=6) ¹
+BufferPostCutoffGrowth/2097152/Project/Fast           387.011Mi ± 0%   4.000Mi ± 0%  -98.97% (p=0.002 n=6)
+BufferPostCutoffGrowth/2097152/bytes.Buffer/New         3.996Mi ± 0%   3.996Mi ± 0%        ~ (p=1.000 n=6) ¹
+BufferPostCutoffGrowth/8388608/Project/Fast           8073.08Mi ± 0%   16.00Mi ± 0%  -99.80% (p=0.002 n=6)
+BufferPostCutoffGrowth/8388608/bytes.Buffer/New         16.00Mi ± 0%   16.00Mi ± 0%        ~ (p=1.000 n=6) ¹
+BufferReadFromPostCutoff/Project/Fast                3084.105Mi ± 0%   8.003Mi ± 0%  -99.74% (p=0.002 n=6)
+BufferReadFromPostCutoff/bytes.Buffer/New               8.000Mi ± 0%   8.000Mi ± 0%        ~ (p=1.000 n=6) ¹
+geomean                                                 52.67Mi        6.726Mi       -87.23%
+¹ all samples are equal
+
+                                                │ before-2abad05.txt │          after-6d7c473.txt          │
+                                                │     allocs/op      │ allocs/op   vs base                 │
+BufferPostCutoffGrowth/1048577/Project/Fast               63.00 ± 3%   63.00 ± 0%        ~ (p=1.000 n=6)
+BufferPostCutoffGrowth/1048577/bytes.Buffer/New           12.00 ± 0%   12.00 ± 0%        ~ (p=1.000 n=6) ¹
+BufferPostCutoffGrowth/2097152/Project/Fast              571.00 ± 0%   63.00 ± 0%  -88.97% (p=0.002 n=6)
+BufferPostCutoffGrowth/2097152/bytes.Buffer/New           12.00 ± 0%   12.00 ± 0%        ~ (p=1.000 n=6) ¹
+BufferPostCutoffGrowth/8388608/Project/Fast             3643.00 ± 0%   67.00 ± 0%  -98.16% (p=0.002 n=6)
+BufferPostCutoffGrowth/8388608/bytes.Buffer/New           14.00 ± 0%   14.00 ± 0%        ~ (p=1.000 n=6) ¹
+BufferReadFromPostCutoff/Project/Fast                   4164.00 ± 0%   70.00 ± 0%  -98.32% (p=0.002 n=6)
+BufferReadFromPostCutoff/bytes.Buffer/New                 15.00 ± 0%   15.00 ± 0%        ~ (p=1.000 n=6) ¹
+geomean                                                   106.5        29.43       -72.36%
+¹ all samples are equal

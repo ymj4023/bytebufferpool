@@ -189,7 +189,7 @@ func (b *Buffer) growthCapacity(required int) int {
 	// appends. This Buffer preserves deterministic Capacity Class routing while
 	// pooled, applies geometric reservation only when no class can satisfy the
 	// request, and clamps that reservation to MaxAcquireSize.
-	// https://go.dev/src/bytes/buffer.go
+	// https://github.com/golang/go/blob/go1.26.7/src/bytes/buffer.go
 	currentCapacity := 0
 	if b.lease.storage != nil {
 		currentCapacity = cap(b.lease.storage.buf)

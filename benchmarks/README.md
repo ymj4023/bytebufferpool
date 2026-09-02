@@ -42,6 +42,8 @@ Collect post-cutoff small-chunk and streaming Buffer growth samples:
 go test -run '^$' -bench '^(BenchmarkBufferPostCutoffGrowth|BenchmarkBufferReadFromPostCutoff)$' -benchmem -benchtime=1s -count=10 -cpu=1
 ```
 
+The committed [Issue #13 before/after evidence](./results/2026-09-02-windows-amd64-go1.26.7-ryzen9-8945hx/issue-13/README.md) uses the same benchmark source against fixed library revisions and records the exact comparison procedure.
+
 Record the complete Go version, GOOS/GOARCH, CPU, logical core count, GOMAXPROCS, GOGC, memory limit, project commit, and dependency versions beside every published result.
 
 ## Isolated-process memory suite

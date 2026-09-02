@@ -156,6 +156,18 @@ Release 会返回以下状态之一：
 
 本项目在这些 workload 中并非全面最快。它的主要差异是确定性容量、显式所有权、旧 Generation 拒绝，以及可选的精确 Retained Capacity 预算。
 
+### cutoff 之后的 Buffer 增长 — Issue #13 前后对比
+
+使用同一份 benchmark 源码，分别测试已发布的 `v1.0.1` 实现（`2abad05`）与几何增长修复（`6d7c473`）。环境仍为上述机器与 Go 1.26.7，每个 benchmark name 在 CPU1 下运行 6 个 `1x` 样本。
+
+| Workload | 修复前 B/op | 修复后 B/op | 修复前 allocs/op | 修复后 allocs/op |
+| --- | ---: | ---: | ---: | ---: |
+| 以 4 KiB chunks 写入 2 MiB | 387.011 MiB | 4.000 MiB | 571 | 63 |
+| 以 4 KiB chunks 写入 8 MiB | 8073.08 MiB | 16.00 MiB | 3643 | 67 |
+| 2 MiB `ReadFrom` | 3084.105 MiB | 8.003 MiB | 4164 | 70 |
+
+在 `cutoff+1` 处，几何预留使分配量从 3.008 MiB 增至 4.000 MiB，而时间和分配次数在本组样本中没有变化。这是以空间换取后续摊销的明确权衡。仓库已提交[原始输出、benchstat、revision 与复现步骤](./benchmarks/results/2026-09-02-windows-amd64-go1.26.7-ryzen9-8945hx/issue-13/README.md)。
+
 ### 生命周期与预算 — Project Fast Raw，1 KiB
 
 | 状态 | ns/op | B/op | allocs/op |
