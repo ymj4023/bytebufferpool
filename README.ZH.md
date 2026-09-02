@@ -66,7 +66,7 @@ _, _ = buffer.Write([]byte("world"))
 _, _ = buffer.WriteTo(destination)
 ```
 
-Buffer 不可复制，内部拥有一个 Lease，并实现 `io.Writer`、`io.ByteWriter`、`io.StringWriter`、`io.ReaderFrom` 和 `io.WriterTo`。扩容时会获取新 Lease、复制有效内容并立即释放旧 Lease。扩容失败不会修改已有内容。
+Buffer 不可复制，内部拥有一个 Lease，并实现 `io.Writer`、`io.ByteWriter`、`io.StringWriter`、`io.ReaderFrom` 和 `io.WriterTo`。扩容时会获取新 Lease、复制有效内容并立即释放旧 Lease。当没有 Capacity Class 能满足请求时，Buffer 会按几何方式预留 capacity，但不会保留这类 oversize storage；每次 acquisition 仍受 `MaxAcquireSize` 限制。扩容失败不会修改已有内容。
 
 ## Capacity 与保留策略
 

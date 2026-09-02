@@ -1,6 +1,7 @@
 package benchmarks
 
 import (
+	"bytes"
 	"fmt"
 	"runtime"
 	"sync/atomic"
@@ -103,6 +104,62 @@ func BenchmarkBufferParallel(b *testing.B) {
 			})
 		})
 	}
+}
+
+func BenchmarkBufferPostCutoffGrowth(b *testing.B) {
+	const chunkSize = 4 << 10
+	chunk := make([]byte, chunkSize)
+	for _, size := range []int{1<<20 + 1, 2 << 20, 8 << 20} {
+		b.Run(fmt.Sprintf("%d/Project/Fast", size), func(b *testing.B) {
+			pool := mustPool(bytebufferpool.DefaultConfig(bytebufferpool.Fast))
+			b.ReportAllocs()
+			b.SetBytes(int64(size))
+			for range b.N {
+				buffer := pool.Buffer(0)
+				writeBufferChunks(b, &buffer, chunk, size)
+				benchmarkSink.Add(uint64(buffer.Len()))
+				buffer.Release()
+			}
+		})
+		b.Run(fmt.Sprintf("%d/bytes.Buffer/New", size), func(b *testing.B) {
+			b.ReportAllocs()
+			b.SetBytes(int64(size))
+			for range b.N {
+				var buffer bytes.Buffer
+				writeStandardBufferChunks(b, &buffer, chunk, size)
+				benchmarkSink.Add(uint64(buffer.Len()))
+			}
+		})
+	}
+}
+
+func BenchmarkBufferReadFromPostCutoff(b *testing.B) {
+	const size = 2 << 20
+	payload := make([]byte, size)
+	b.Run("Project/Fast", func(b *testing.B) {
+		pool := mustPool(bytebufferpool.DefaultConfig(bytebufferpool.Fast))
+		b.ReportAllocs()
+		b.SetBytes(size)
+		for range b.N {
+			buffer := pool.Buffer(0)
+			if _, err := buffer.ReadFrom(bytes.NewReader(payload)); err != nil {
+				b.Fatalf("ReadFrom(): %v", err)
+			}
+			benchmarkSink.Add(uint64(buffer.Len()))
+			buffer.Release()
+		}
+	})
+	b.Run("bytes.Buffer/New", func(b *testing.B) {
+		b.ReportAllocs()
+		b.SetBytes(size)
+		for range b.N {
+			var buffer bytes.Buffer
+			if _, err := buffer.ReadFrom(bytes.NewReader(payload)); err != nil {
+				b.Fatalf("ReadFrom(): %v", err)
+			}
+			benchmarkSink.Add(uint64(buffer.Len()))
+		}
+	})
 }
 
 func BenchmarkRawLifecycle(b *testing.B) {
@@ -211,6 +268,28 @@ func benchmarkBufferChunks(b *testing.B, adapter bufferAdapter, chunks [][]byte,
 		adapter.Release(&borrowed)
 	}
 	benchmarkSink.Add(sink)
+}
+
+func writeBufferChunks(b *testing.B, buffer *bytebufferpool.Buffer, chunk []byte, size int) {
+	b.Helper()
+	for written := 0; written < size; {
+		length := min(len(chunk), size-written)
+		if _, err := buffer.Write(chunk[:length]); err != nil {
+			b.Fatalf("Write(): %v", err)
+		}
+		written += length
+	}
+}
+
+func writeStandardBufferChunks(b *testing.B, buffer *bytes.Buffer, chunk []byte, size int) {
+	b.Helper()
+	for written := 0; written < size; {
+		length := min(len(chunk), size-written)
+		if _, err := buffer.Write(chunk[:length]); err != nil {
+			b.Fatalf("Write(): %v", err)
+		}
+		written += length
+	}
 }
 
 func touchRaw(buffer []byte) uint64 {

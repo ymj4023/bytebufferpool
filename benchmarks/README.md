@@ -36,6 +36,12 @@ Collect explicit lifecycle and budget samples with setup and GC outside timed re
 go test -run '^$' -bench '^(BenchmarkRawLifecycle|BenchmarkBoundedBudgetExhaustion)$' -benchmem -benchtime=20x -count=10 -cpu=1,8
 ```
 
+Collect post-cutoff small-chunk and streaming Buffer growth samples:
+
+```text
+go test -run '^$' -bench '^(BenchmarkBufferPostCutoffGrowth|BenchmarkBufferReadFromPostCutoff)$' -benchmem -benchtime=1s -count=10 -cpu=1
+```
+
 Record the complete Go version, GOOS/GOARCH, CPU, logical core count, GOMAXPROCS, GOGC, memory limit, project commit, and dependency versions beside every published result.
 
 ## Isolated-process memory suite

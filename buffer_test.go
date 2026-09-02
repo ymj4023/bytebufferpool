@@ -3,6 +3,7 @@ package bytebufferpool_test
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"testing"
 
 	bytebufferpool "github.com/ymj4023/bytebufferpool"
@@ -74,6 +75,125 @@ func TestBufferGrowthReleasesOldLease(t *testing.T) {
 	}
 	if got := buffer.Release(); got != bytebufferpool.Retained {
 		t.Fatalf("Buffer.Release() = %v; want Retained", got)
+	}
+}
+
+func TestBufferGrowthBeyondPoolingCutoffIsAmortized(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:              bytebufferpool.Fast,
+		Classes:           []int{64},
+		MaxPooledCapacity: 64,
+		MaxAcquireSize:    512,
+	})
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+	buffer := pool.Buffer(64)
+	defer buffer.Release()
+	if _, err := buffer.Write(bytes.Repeat([]byte{'a'}, 64)); err != nil {
+		t.Fatalf("seed Write(): %v", err)
+	}
+
+	const appends = 64
+	previousCapacity := buffer.Cap()
+	capacityChanges := 0
+	for range appends {
+		if err := buffer.WriteByte('b'); err != nil {
+			t.Fatalf("post-cutoff WriteByte(): %v", err)
+		}
+		if buffer.Cap() != previousCapacity {
+			capacityChanges++
+			previousCapacity = buffer.Cap()
+		}
+	}
+	if capacityChanges > 8 {
+		t.Fatalf("capacity changed %d times for %d post-cutoff appends; want amortized growth", capacityChanges, appends)
+	}
+	if buffer.Len() != 128 || buffer.Bytes()[64] != 'b' {
+		t.Fatalf("grown Buffer = len %d marker %q; want len 128 marker 'b'", buffer.Len(), buffer.Bytes()[64])
+	}
+}
+
+func TestBufferUnpooledGrowthRespectsAcquireLimit(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:              bytebufferpool.Fast,
+		Classes:           []int{64},
+		MaxPooledCapacity: 64,
+		MaxAcquireSize:    100,
+	})
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+	buffer := pool.Buffer(64)
+	defer buffer.Release()
+	want := bytes.Repeat([]byte{'x'}, 64)
+	if _, err := buffer.Write(want); err != nil {
+		t.Fatalf("seed Write(): %v", err)
+	}
+
+	if err := buffer.Grow(36); err != nil {
+		t.Fatalf("Grow to limit: %v", err)
+	}
+	if buffer.Cap() != 100 || buffer.Len() != 64 || !bytes.Equal(buffer.Bytes(), want) {
+		t.Fatalf("Buffer after Grow to limit = len %d/cap %d/content preserved %v; want 64/100/true", buffer.Len(), buffer.Cap(), bytes.Equal(buffer.Bytes(), want))
+	}
+	if err := buffer.Grow(37); !errors.Is(err, bytebufferpool.ErrInvalidSize) {
+		t.Fatalf("Grow beyond limit error = %v; want ErrInvalidSize", err)
+	}
+	if buffer.Cap() != 100 || buffer.Len() != 64 || !bytes.Equal(buffer.Bytes(), want) {
+		t.Fatal("failed geometric growth mutated Buffer")
+	}
+}
+
+func TestBufferUnpooledGrowthPreservesSelfAlias(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:              bytebufferpool.Fast,
+		Classes:           []int{64},
+		MaxPooledCapacity: 64,
+		MaxAcquireSize:    256,
+		ZeroOnRelease:     true,
+	})
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+	buffer := pool.Buffer(64)
+	defer buffer.Release()
+	original := bytes.Repeat([]byte{'a'}, 40)
+	if _, err := buffer.Write(original); err != nil {
+		t.Fatalf("seed Write(): %v", err)
+	}
+
+	if _, err := buffer.Write(buffer.Bytes()); err != nil {
+		t.Fatalf("self-alias Write(): %v", err)
+	}
+	want := append(append([]byte(nil), original...), original...)
+	if !bytes.Equal(buffer.Bytes(), want) {
+		t.Fatalf("self-alias unpooled growth = len %d/cap %d/content %q; want len 80/content preserved", buffer.Len(), buffer.Cap(), buffer.Bytes())
+	}
+}
+
+func TestBufferGrowSupportsPostCutoffSizes(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:              bytebufferpool.Fast,
+		Classes:           []int{64, 1 << 20},
+		MaxPooledCapacity: 1 << 20,
+		MaxAcquireSize:    8 << 20,
+	})
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+
+	for _, size := range []int{1<<20 + 1, 2 << 20, 8 << 20} {
+		t.Run(fmt.Sprintf("%d", size), func(t *testing.T) {
+			buffer := pool.Buffer(0)
+			defer buffer.Release()
+			if err := buffer.Grow(size); err != nil {
+				t.Fatalf("Grow(%d): %v", size, err)
+			}
+			if buffer.Len() != 0 || buffer.Cap() < size || buffer.Cap() > 8<<20 {
+				t.Fatalf("Grow(%d) = len %d/cap %d; want len 0/cap within [%d,%d]", size, buffer.Len(), buffer.Cap(), size, 8<<20)
+			}
+		})
 	}
 }
 

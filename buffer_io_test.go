@@ -36,6 +36,28 @@ type zeroProgressReader struct{}
 
 func (zeroProgressReader) Read([]byte) (int, error) { return 0, nil }
 
+type recordingReader struct {
+	remaining        int
+	firstDestination int
+	calls            int
+}
+
+func (r *recordingReader) Read(destination []byte) (int, error) {
+	r.calls++
+	if r.firstDestination == 0 {
+		r.firstDestination = len(destination)
+	}
+	if r.remaining == 0 {
+		return 0, io.EOF
+	}
+	n := min(len(destination), r.remaining)
+	for i := range destination[:n] {
+		destination[i] = 'r'
+	}
+	r.remaining -= n
+	return n, nil
+}
+
 type limitedWriter struct {
 	limit int
 	err   error
@@ -96,6 +118,36 @@ func TestBufferReadFromStopsZeroProgressAndPreservesOnGrowthFailure(t *testing.T
 	}
 	if !bytes.Equal(full.Bytes(), want) {
 		t.Fatal("ReadFrom growth failure mutated Buffer")
+	}
+}
+
+func TestBufferReadFromGrowsAmortizedBeyondPoolingCutoff(t *testing.T) {
+	const cutoff = 1 << 20
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:              bytebufferpool.Fast,
+		Classes:           []int{64, cutoff},
+		MaxPooledCapacity: cutoff,
+		MaxAcquireSize:    4 * cutoff,
+	})
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+	buffer := pool.Buffer(cutoff)
+	defer buffer.Release()
+	if _, err := buffer.Write(bytes.Repeat([]byte{'s'}, cutoff)); err != nil {
+		t.Fatalf("seed Write(): %v", err)
+	}
+	reader := &recordingReader{remaining: cutoff}
+
+	n, err := buffer.ReadFrom(reader)
+	if err != nil || n != cutoff {
+		t.Fatalf("ReadFrom() = %d, %v; want %d, nil", n, err, cutoff)
+	}
+	if reader.firstDestination <= 512 || reader.calls > 4 {
+		t.Fatalf("post-cutoff ReadFrom used first destination %d and %d calls; want amortized growth instead of fixed 512-byte steps", reader.firstDestination, reader.calls)
+	}
+	if buffer.Len() != 2*cutoff || buffer.Cap() < 2*cutoff || buffer.Cap() > 4*cutoff {
+		t.Fatalf("Buffer after ReadFrom = len %d/cap %d; want len %d/cap within [%d,%d]", buffer.Len(), buffer.Cap(), 2*cutoff, 2*cutoff, 4*cutoff)
 	}
 }
 

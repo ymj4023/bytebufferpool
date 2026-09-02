@@ -101,13 +101,14 @@ func (b *Buffer) Write(data []byte) (int, error) {
 }
 
 func (b *Buffer) writeWithGrowth(data []byte, required int) (int, error) {
-	lease, err := b.pool.TryAcquire(required)
+	lease, err := b.pool.TryAcquire(b.growthCapacity(required))
 	if err != nil {
 		return 0, err
 	}
 	oldLength := b.length()
 	copy(lease.storage.buf, b.lease.storage.buf)
 	copy(lease.storage.buf[oldLength:], data)
+	lease.storage.buf = lease.storage.buf[:required]
 	b.lease.Release()
 	b.lease = lease
 	return len(data), nil
@@ -163,7 +164,7 @@ func (b *Buffer) ensureCapacity(required int) error {
 		return nil
 	}
 
-	lease, err := b.pool.TryAcquire(required)
+	lease, err := b.pool.TryAcquire(b.growthCapacity(required))
 	if err != nil {
 		return err
 	}
@@ -177,6 +178,35 @@ func (b *Buffer) ensureCapacity(required int) error {
 	}
 	b.lease = lease
 	return nil
+}
+
+func (b *Buffer) growthCapacity(required int) int {
+	if b.pool.classForSize(required) >= 0 {
+		return required
+	}
+
+	// Design reference: bytes.Buffer uses geometric growth to amortize repeated
+	// appends. This Buffer preserves deterministic Capacity Class routing while
+	// pooled, applies geometric reservation only when no class can satisfy the
+	// request, and clamps that reservation to MaxAcquireSize.
+	// https://go.dev/src/bytes/buffer.go
+	currentCapacity := 0
+	if b.lease.storage != nil {
+		currentCapacity = cap(b.lease.storage.buf)
+	}
+	target := required
+	if currentCapacity <= maxInt()/2 && 2*currentCapacity > target {
+		target = 2 * currentCapacity
+	}
+	if limit := b.pool.config.MaxAcquireSize; limit > 0 {
+		if required > limit {
+			return required
+		}
+		if target > limit {
+			target = limit
+		}
+	}
+	return target
 }
 
 func (b *Buffer) length() int {

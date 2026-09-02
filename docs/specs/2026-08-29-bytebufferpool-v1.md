@@ -155,7 +155,7 @@ func (b *Buffer) WriteTo(w io.Writer) (int64, error)
 func (b *Buffer) Release() ReleaseStatus
 ```
 
-Buffer is a non-copyable value that owns one Lease. When growth is required, it acquires a sufficiently large new Lease, copies existing content, then releases the old Lease. Growth beyond `MaxPooledCapacity` but within `MaxAcquireSize` uses unpooled storage.
+Buffer is a non-copyable value that owns one Lease. When growth is required, it acquires a sufficiently large new Lease, copies existing content, then releases the old Lease. Capacity Class routing remains unchanged while a class can satisfy the request. When no class can satisfy it, Buffer reserves capacity geometrically from its current capacity, clamps the reservation to `MaxAcquireSize` when configured, and keeps logical length equal to the caller's requested content. The resulting Backing Storage is unpooled and dropped on Release.
 
 Growth failure must preserve existing content. Length arithmetic must detect integer overflow before allocation or mutation.
 
