@@ -43,3 +43,19 @@ _Avoid_: Retained memory, heap size
 **Generation**:
 The Pool epoch captured by a Lease so storage borrowed before `Clear` cannot enter the new epoch when released.
 _Avoid_: Version, revision
+
+**Validation Tombstone**:
+An inactive Raw Slice ownership record retained within a bounded diagnostic history so a later Release may be classified as duplicate.
+_Avoid_: Leaked record, stale owner
+
+**Validation Inventory**:
+The exact active Raw Slice and Validation Tombstone counts maintained while enhanced validation is enabled.
+_Avoid_: Validation memory, raw map size
+
+**Class Inventory**:
+The exact count and Retained Capacity of idle Backing Storage in one Bounded Backend Capacity Class.
+_Avoid_: ClassStats, bucket metrics
+
+**Unpooled Backing Storage**:
+Valid Backing Storage that no Capacity Class can retain; storage within the pooling cutoff is distinct from Oversize Backing Storage.
+_Avoid_: Invalid storage, pooled fallback
