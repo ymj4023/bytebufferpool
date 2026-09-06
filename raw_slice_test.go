@@ -150,3 +150,133 @@ func TestRawSliceEnhancedValidationRejectsChangedCapacity(t *testing.T) {
 		t.Fatalf("ReleaseSlice() after capacity change = %v; want DroppedInvalid", got)
 	}
 }
+
+func TestRawSliceValidationEvictsOldestInactiveTombstone(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:                    bytebufferpool.Fast,
+		Classes:                 []int{64},
+		MaxPooledCapacity:       64,
+		ValidationEnabled:       true,
+		MaxValidationTombstones: 2,
+	})
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+
+	raw := [][]byte{
+		pool.AcquireSlice(64),
+		pool.AcquireSlice(64),
+		pool.AcquireSlice(64),
+	}
+	for i := range raw {
+		if status := pool.ReleaseSlice(raw[i]); status != bytebufferpool.Retained {
+			t.Fatalf("ReleaseSlice(%d) = %v; want Retained", i, status)
+		}
+		raw[i][0] = byte(0x40 + i)
+	}
+
+	stats := pool.Stats()
+	if stats.ActiveRawSlices != 0 || stats.ValidationTombstones != 2 {
+		t.Fatalf("Validation Inventory = active %d/tombstones %d; want 0/2", stats.ActiveRawSlices, stats.ValidationTombstones)
+	}
+	wantStatuses := []bytebufferpool.ReleaseStatus{
+		bytebufferpool.RejectedForeign,
+		bytebufferpool.RejectedDuplicate,
+		bytebufferpool.RejectedDuplicate,
+	}
+	for i, want := range wantStatuses {
+		if status := pool.ReleaseSlice(raw[i]); status != want {
+			t.Fatalf("second ReleaseSlice(%d) = %v; want %v", i, status, want)
+		}
+		if raw[i][0] != byte(0x40+i) {
+			t.Fatalf("rejected ReleaseSlice(%d) modified byte to %#x", i, raw[i][0])
+		}
+	}
+}
+
+func TestRawSliceValidationClearPreservesActiveOwnership(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:                    bytebufferpool.Bounded,
+		Classes:                 []int{64},
+		MaxPooledCapacity:       64,
+		MaxRetainedCapacity:     128,
+		ValidationEnabled:       true,
+		MaxValidationTombstones: 2,
+	})
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+
+	active := pool.AcquireSlice(64)
+	tombstone := pool.AcquireSlice(64)
+	if status := pool.ReleaseSlice(tombstone); status != bytebufferpool.Retained {
+		t.Fatalf("tombstone ReleaseSlice() = %v; want Retained", status)
+	}
+	stats := pool.Stats()
+	if stats.ActiveRawSlices != 1 || stats.ValidationTombstones != 1 {
+		t.Fatalf("Validation Inventory before Clear = active %d/tombstones %d; want 1/1", stats.ActiveRawSlices, stats.ValidationTombstones)
+	}
+
+	tombstone[0] = 0x5a
+	pool.Clear()
+	stats = pool.Stats()
+	if stats.ActiveRawSlices != 1 || stats.ValidationTombstones != 0 {
+		t.Fatalf("Validation Inventory after Clear = active %d/tombstones %d; want 1/0", stats.ActiveRawSlices, stats.ValidationTombstones)
+	}
+	if status := pool.ReleaseSlice(tombstone); status != bytebufferpool.RejectedForeign {
+		t.Fatalf("cleared tombstone ReleaseSlice() = %v; want RejectedForeign", status)
+	}
+	if tombstone[0] != 0x5a {
+		t.Fatalf("cleared tombstone rejection modified byte to %#x", tombstone[0])
+	}
+	if status := pool.ReleaseSlice(active); status != bytebufferpool.Retained {
+		t.Fatalf("active pre-Clear ReleaseSlice() = %v; want Retained", status)
+	}
+	stats = pool.Stats()
+	if stats.ActiveRawSlices != 0 || stats.ValidationTombstones != 1 {
+		t.Fatalf("Validation Inventory after active Release = active %d/tombstones %d; want 0/1", stats.ActiveRawSlices, stats.ValidationTombstones)
+	}
+}
+
+func TestRawSliceValidationKeepsReusedAddressActiveAboveTombstoneLimit(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:                    bytebufferpool.Bounded,
+		Classes:                 []int{64},
+		MaxPooledCapacity:       64,
+		MaxRetainedCapacity:     64,
+		ValidationEnabled:       true,
+		MaxValidationTombstones: 1,
+	})
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+
+	original := pool.AcquireSlice(64)
+	if status := pool.ReleaseSlice(original); status != bytebufferpool.Retained {
+		t.Fatalf("original ReleaseSlice() = %v; want Retained", status)
+	}
+	reused := pool.AcquireSlice(64)
+	if &original[0] != &reused[0] {
+		t.Fatal("Bounded LIFO did not return the retained Backing Storage needed for the address-reuse scenario")
+	}
+	firstOversize := pool.AcquireSlice(65)
+	secondOversize := pool.AcquireSlice(65)
+	stats := pool.Stats()
+	if stats.ActiveRawSlices != 3 || stats.ValidationTombstones != 0 {
+		t.Fatalf("Validation Inventory above limit = active %d/tombstones %d; want 3/0", stats.ActiveRawSlices, stats.ValidationTombstones)
+	}
+
+	if status := pool.ReleaseSlice(firstOversize); status != bytebufferpool.DroppedOversize {
+		t.Fatalf("first oversize ReleaseSlice() = %v; want DroppedOversize", status)
+	}
+	if status := pool.ReleaseSlice(secondOversize); status != bytebufferpool.DroppedOversize {
+		t.Fatalf("second oversize ReleaseSlice() = %v; want DroppedOversize", status)
+	}
+	stats = pool.Stats()
+	if stats.ActiveRawSlices != 1 || stats.ValidationTombstones != 1 {
+		t.Fatalf("Validation Inventory after FIFO eviction = active %d/tombstones %d; want 1/1", stats.ActiveRawSlices, stats.ValidationTombstones)
+	}
+	if status := pool.ReleaseSlice(reused); status != bytebufferpool.Retained {
+		t.Fatalf("reused active ReleaseSlice() = %v; want Retained", status)
+	}
+}

@@ -48,6 +48,10 @@ Record the complete Go version, GOOS/GOARCH, CPU, logical core count, GOMAXPROCS
 
 ## Isolated-process memory suite
 
+The [v1.1 validation-history evidence](./results/2026-09-06-windows-amd64-go1.26.7/validation/README.md)
+uses `go run ./cmd/validationmem` in fresh processes to distinguish active-owner
+peaks, bounded inactive history, map allocation high-water, and Clear recovery.
+
 Build or run the memory harness with one contender per child process:
 
 ```text

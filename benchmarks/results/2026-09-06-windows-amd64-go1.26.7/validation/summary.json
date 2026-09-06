@@ -1,0 +1,402 @@
+[
+  {
+    "group": "16384, False, active_peak",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 1704000,
+      "min": 1704000,
+      "median": 1704000
+    },
+    "heapInuseDelta": {
+      "max": 1728512,
+      "min": 1728512,
+      "median": 1728512
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "16384, False, after_churn",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 240,
+      "min": 240,
+      "median": 240
+    },
+    "heapInuseDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "16384, False, after_clear",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 240,
+      "min": 240,
+      "median": 240
+    },
+    "heapInuseDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "16384, False, baseline",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "heapInuseDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "16384, False, released_peak",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 128,
+      "min": 128,
+      "median": 128
+    },
+    "heapInuseDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "16384, True, active_peak",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 3278160,
+      "min": 3278144,
+      "median": 3278144
+    },
+    "heapInuseDelta": {
+      "max": 3301376,
+      "min": 3301376,
+      "median": 3301376
+    },
+    "active": [
+      16384
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "16384, True, after_churn",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 1574384,
+      "min": 1574384,
+      "median": 1574384
+    },
+    "heapInuseDelta": {
+      "max": 1572864,
+      "min": 1572864,
+      "median": 1572864
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      16384
+    ]
+  },
+  {
+    "group": "16384, True, after_clear",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 240,
+      "min": 240,
+      "median": 240
+    },
+    "heapInuseDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "16384, True, baseline",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "heapInuseDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "16384, True, released_peak",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 1574272,
+      "min": 1574272,
+      "median": 1574272
+    },
+    "heapInuseDelta": {
+      "max": 1572864,
+      "min": 1572864,
+      "median": 1572864
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      16384
+    ]
+  },
+  {
+    "group": "65536, False, active_peak",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 6815808,
+      "min": 6815808,
+      "median": 6815808
+    },
+    "heapInuseDelta": {
+      "max": 6938624,
+      "min": 6938624,
+      "median": 6938624
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "65536, False, after_churn",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 240,
+      "min": 240,
+      "median": 240
+    },
+    "heapInuseDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "65536, False, after_clear",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 240,
+      "min": 240,
+      "median": 240
+    },
+    "heapInuseDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "65536, False, baseline",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "heapInuseDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "65536, False, released_peak",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 128,
+      "min": 128,
+      "median": 128
+    },
+    "heapInuseDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "65536, True, active_peak",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 13112512,
+      "min": 13112512,
+      "median": 13112512
+    },
+    "heapInuseDelta": {
+      "max": 13238272,
+      "min": 13238272,
+      "median": 13238272
+    },
+    "active": [
+      65536
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "65536, True, after_churn",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 6296944,
+      "min": 6296944,
+      "median": 6296944
+    },
+    "heapInuseDelta": {
+      "max": 6299648,
+      "min": 6299648,
+      "median": 6299648
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      16384
+    ]
+  },
+  {
+    "group": "65536, True, after_clear",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 240,
+      "min": 240,
+      "median": 240
+    },
+    "heapInuseDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "65536, True, baseline",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "heapInuseDelta": {
+      "max": 0,
+      "min": 0,
+      "median": 0
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      0
+    ]
+  },
+  {
+    "group": "65536, True, released_peak",
+    "samples": 5,
+    "heapAllocDelta": {
+      "max": 6296832,
+      "min": 6296832,
+      "median": 6296832
+    },
+    "heapInuseDelta": {
+      "max": 6299648,
+      "min": 6299648,
+      "median": 6299648
+    },
+    "active": [
+      0
+    ],
+    "tombstones": [
+      16384
+    ]
+  }
+]

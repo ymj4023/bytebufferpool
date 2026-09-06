@@ -54,6 +54,10 @@ Raw Slice has the same length and Capacity Class contract as Lease, but carries 
 
 If append replaces the Backing Storage, do not release the replacement as if it were the original borrowed slice.
 
+Enhanced validation supports long-running Pools. `MaxValidationTombstones` bounds inactive diagnostic history (zero selects 16,384; positive values set the exact limit). Negative limits and non-zero limits with validation disabled are configuration errors. History is FIFO by Release time; duplicate checks do not refresh it. Once a tombstone is evicted or discarded by `Clear`, a later old-alias Release becomes `RejectedForeign` instead of `RejectedDuplicate`; neither rejection modifies storage.
+
+Active Raw Slice owners are never evicted or limited. `Clear` rebuilds validation storage with active records only, allowing the old map and inactive history to become garbage. Active-owner peaks and Go map allocation high-water can exceed the inactive-history bound; it is not a heap or RSS limit. `Stats.ValidationAvailable`, `ActiveRawSlices`, `ValidationTombstones`, and `MaxValidationTombstones` report exact validation state under one lock in both modes, independently of optional counters.
+
 ## Buffer
 
 ```go

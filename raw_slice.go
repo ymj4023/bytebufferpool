@@ -5,8 +5,10 @@ import "unsafe"
 const releasedDiagnosticByte = 0xa5
 
 type rawRecord struct {
-	capacity int
-	active   bool
+	capacity          int
+	active            bool
+	previousTombstone uintptr
+	nextTombstone     uintptr
 }
 
 // AcquireSlice returns a low-level Raw Slice and panics when size is invalid.
@@ -46,6 +48,8 @@ func (p *Pool) TryAcquireSlice(size int) ([]byte, error) {
 // ReleaseSlice releases a Raw Slice to the current Pool Generation.
 // Enhanced validation detects observable ownership mistakes, but cannot
 // eliminate the ABA ambiguity created by mutable slice aliases.
+// An inactive record evicted by the FIFO limit or discarded by Clear is
+// reported as RejectedForeign instead of RejectedDuplicate, without mutation.
 func (p *Pool) ReleaseSlice(buffer []byte) ReleaseStatus {
 	if buffer == nil {
 		return p.recordRelease(IgnoredNil, -1)
@@ -95,11 +99,16 @@ func (p *Pool) rawWrapper() *backingStorage {
 func (p *Pool) registerRaw(buffer []byte) {
 	key := rawKey(buffer)
 	p.validationMu.Lock()
-	if record := p.rawRecords[key]; record.active {
+	record, exists := p.rawRecords[key]
+	if record.active {
 		p.validationMu.Unlock()
 		panic("bytebufferpool: backing storage handed to two live Raw Slice owners")
 	}
+	if exists {
+		p.removeValidationTombstoneLocked(record)
+	}
 	p.rawRecords[key] = rawRecord{capacity: cap(buffer), active: true}
+	p.activeRawSlices++
 	p.validationMu.Unlock()
 }
 
@@ -115,14 +124,79 @@ func (p *Pool) validateRawRelease(buffer []byte) (status ReleaseStatus, proceed,
 		p.validationMu.Unlock()
 		return RejectedDuplicate, false, false, record.capacity
 	}
-	record.active = false
-	p.rawRecords[key] = record
+	p.activeRawSlices--
+	p.addValidationTombstoneLocked(key, record)
 	p.validationMu.Unlock()
 
 	if cap(buffer) != record.capacity {
 		return DroppedInvalid, false, true, record.capacity
 	}
 	return Retained, true, true, record.capacity
+}
+
+func (p *Pool) addValidationTombstoneLocked(key uintptr, record rawRecord) {
+	record.active = false
+	record.previousTombstone = p.validationTombstoneTail
+	record.nextTombstone = 0
+	if p.validationTombstoneTail == 0 {
+		p.validationTombstoneHead = key
+	} else {
+		tail := p.rawRecords[p.validationTombstoneTail]
+		tail.nextTombstone = key
+		p.rawRecords[p.validationTombstoneTail] = tail
+	}
+	p.validationTombstoneTail = key
+	p.rawRecords[key] = record
+	p.validationTombstones++
+
+	for p.validationTombstones > int64(p.config.MaxValidationTombstones) {
+		p.evictOldestValidationTombstoneLocked()
+	}
+}
+
+func (p *Pool) removeValidationTombstoneLocked(record rawRecord) {
+	if record.previousTombstone == 0 {
+		p.validationTombstoneHead = record.nextTombstone
+	} else {
+		previous := p.rawRecords[record.previousTombstone]
+		previous.nextTombstone = record.nextTombstone
+		p.rawRecords[record.previousTombstone] = previous
+	}
+	if record.nextTombstone == 0 {
+		p.validationTombstoneTail = record.previousTombstone
+	} else {
+		next := p.rawRecords[record.nextTombstone]
+		next.previousTombstone = record.previousTombstone
+		p.rawRecords[record.nextTombstone] = next
+	}
+	p.validationTombstones--
+}
+
+func (p *Pool) evictOldestValidationTombstoneLocked() {
+	key := p.validationTombstoneHead
+	record := p.rawRecords[key]
+	p.removeValidationTombstoneLocked(record)
+	delete(p.rawRecords, key)
+}
+
+func (p *Pool) clearValidationTombstones() {
+	if !p.config.ValidationEnabled {
+		return
+	}
+	p.validationMu.Lock()
+	activeRecords := make(map[uintptr]rawRecord)
+	for key, record := range p.rawRecords {
+		if record.active {
+			record.previousTombstone = 0
+			record.nextTombstone = 0
+			activeRecords[key] = record
+		}
+	}
+	p.rawRecords = activeRecords
+	p.validationTombstoneHead = 0
+	p.validationTombstoneTail = 0
+	p.validationTombstones = 0
+	p.validationMu.Unlock()
 }
 
 func rawKey(buffer []byte) uintptr {

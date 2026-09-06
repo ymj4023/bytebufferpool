@@ -175,6 +175,39 @@ func TestOptionalStatsStayDisabledWithoutLosingBoundedInventory(t *testing.T) {
 	}
 }
 
+func TestValidationInventoryReportsDefaultWithoutOptionalCounters(t *testing.T) {
+	pool, err := bytebufferpool.New(bytebufferpool.Config{
+		Mode:              bytebufferpool.Fast,
+		Classes:           []int{64},
+		MaxPooledCapacity: 64,
+		ValidationEnabled: true,
+	})
+	if err != nil {
+		t.Fatalf("New(): %v", err)
+	}
+
+	stats := pool.Stats()
+	if !stats.ValidationAvailable || stats.ActiveRawSlices != 0 || stats.ValidationTombstones != 0 || stats.MaxValidationTombstones != 16_384 {
+		t.Fatalf("initial Validation Inventory = available %t, active %d, tombstones %d, limit %d; want true/0/0/16384", stats.ValidationAvailable, stats.ActiveRawSlices, stats.ValidationTombstones, stats.MaxValidationTombstones)
+	}
+	if stats.CountersAvailable {
+		t.Fatal("Validation Inventory enabled optional operation counters")
+	}
+
+	raw := pool.AcquireSlice(64)
+	stats = pool.Stats()
+	if stats.ActiveRawSlices != 1 || stats.ValidationTombstones != 0 {
+		t.Fatalf("Validation Inventory while owned = active %d/tombstones %d; want 1/0", stats.ActiveRawSlices, stats.ValidationTombstones)
+	}
+	if status := pool.ReleaseSlice(raw); status != bytebufferpool.Retained {
+		t.Fatalf("ReleaseSlice() = %v; want Retained", status)
+	}
+	stats = pool.Stats()
+	if stats.ActiveRawSlices != 0 || stats.ValidationTombstones != 1 {
+		t.Fatalf("Validation Inventory after Release = active %d/tombstones %d; want 0/1", stats.ActiveRawSlices, stats.ValidationTombstones)
+	}
+}
+
 func TestRawSliceRecordsZeroOversizeAndInvalidOperations(t *testing.T) {
 	pool, err := bytebufferpool.New(bytebufferpool.Config{
 		Mode:              bytebufferpool.Fast,

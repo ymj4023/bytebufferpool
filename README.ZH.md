@@ -54,6 +54,10 @@ Raw Slice 与 Lease 具有相同的长度和 Capacity Class 契约，但不携�
 
 如果 append 更换了 Backing Storage，不要把新 slice 当成原借用对象归还。
 
+增强验证支持长期运行的 Pool。`MaxValidationTombstones` 限制非活跃诊断历史（零采用默认值 16,384，正数指定精确上限）。负数，以及关闭验证时设置非零上限，都会导致配置错误。历史按 Release 时间 FIFO 淘汰；重复检查不会刷新顺序。记录被淘汰或被 `Clear` 丢弃后，旧 alias 再次 Release 会返回 `RejectedForeign` 而非 `RejectedDuplicate`；两种拒绝均不修改存储。
+
+活跃 Raw Slice 所有者不会被淘汰或限制。`Clear` 仅保留活跃记录并重建验证存储，使旧 map 和非活跃历史可被垃圾回收。活跃所有者峰值和 Go map 分配高水位可能超过非活跃历史上限；这不是 heap 或 RSS 限制。`Stats.ValidationAvailable`、`ActiveRawSlices`、`ValidationTombstones` 和 `MaxValidationTombstones` 在同一把锁下提供精确验证状态，两种模式均可用且不依赖可选 counters。
+
 ## Buffer
 
 ```go

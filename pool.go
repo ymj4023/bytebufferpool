@@ -33,15 +33,19 @@ type poolGeneration struct {
 
 // Pool lends reusable byte storage under one immutable configuration.
 type Pool struct {
-	config       Config
-	sizes        []int
-	clearMu      sync.Mutex
-	generation   atomic.Uint64
-	current      atomic.Pointer[poolGeneration]
-	rawWrappers  sync.Pool
-	validationMu sync.Mutex
-	rawRecords   map[uintptr]rawRecord
-	counters     *poolCounters
+	config                  Config
+	sizes                   []int
+	clearMu                 sync.Mutex
+	generation              atomic.Uint64
+	current                 atomic.Pointer[poolGeneration]
+	rawWrappers             sync.Pool
+	validationMu            sync.Mutex
+	rawRecords              map[uintptr]rawRecord
+	validationTombstoneHead uintptr
+	validationTombstoneTail uintptr
+	activeRawSlices         int64
+	validationTombstones    int64
+	counters                *poolCounters
 }
 
 // New constructs a Pool from config.
@@ -82,10 +86,13 @@ func (p *Pool) newGeneration(id uint64) *poolGeneration {
 }
 
 // Clear discards currently idle Backing Storage and advances Pool Generation.
+// With enhanced validation, it also discards inactive diagnostic history and
+// rebuilds validation storage with active Raw Slice ownership records only.
 func (p *Pool) Clear() {
 	p.clearMu.Lock()
 	id := p.generation.Add(1)
 	p.current.Store(p.newGeneration(id))
+	p.clearValidationTombstones()
 	p.clearMu.Unlock()
 }
 

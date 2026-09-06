@@ -2,7 +2,10 @@ package bytebufferpool
 
 import "fmt"
 
-const defaultMaxPooledCapacity = 1 << 20
+const (
+	defaultMaxPooledCapacity       = 1 << 20
+	defaultMaxValidationTombstones = 16_384
+)
 
 // Mode selects a Pool retention policy.
 type Mode uint8
@@ -23,7 +26,12 @@ type Config struct {
 	MaxAcquireSize      int
 	ZeroOnRelease       bool
 	ValidationEnabled   bool
-	StatsEnabled        bool
+	// MaxValidationTombstones bounds inactive Raw Slice diagnostic history.
+	// Zero selects 16,384 when validation is enabled. Negative values, or a
+	// non-zero limit with validation disabled, are invalid. Active owners are
+	// never limited; this is not a Go heap or RSS budget.
+	MaxValidationTombstones int
+	StatsEnabled            bool
 }
 
 // DefaultConfig returns the default configuration for mode.
@@ -62,6 +70,15 @@ func normalizeConfig(config Config) (Config, error) {
 	}
 	if config.Mode == Bounded && config.MaxRetainedCapacity <= 0 {
 		return Config{}, fmt.Errorf("%w: Bounded mode requires a positive retained-capacity budget", ErrInvalidConfig)
+	}
+	if config.MaxValidationTombstones < 0 {
+		return Config{}, fmt.Errorf("%w: negative Validation Tombstone limit %d", ErrInvalidConfig, config.MaxValidationTombstones)
+	}
+	if !config.ValidationEnabled && config.MaxValidationTombstones != 0 {
+		return Config{}, fmt.Errorf("%w: Validation Tombstone limit requires enhanced validation", ErrInvalidConfig)
+	}
+	if config.ValidationEnabled && config.MaxValidationTombstones == 0 {
+		config.MaxValidationTombstones = defaultMaxValidationTombstones
 	}
 	if len(config.Classes) == 0 {
 		config.Classes = DefaultConfig(config.Mode).Classes
