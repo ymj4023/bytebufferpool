@@ -135,6 +135,13 @@ Release 会返回以下状态之一：
 - `RejectedForeign`
 - `RejectedDuplicate`
 - `IgnoredNil`
+- `DroppedUnpooled`
+
+`DroppedUnpooled` 表示有效存储未超过 `MaxPooledCapacity`，但没有匹配的 Capacity Class；
+超过该 cutoff 仍返回 `DroppedOversize`。非法存储或经验证确认 capacity 被修改的存储仍为
+`DroppedInvalid`，所有权错误优先处理。未启用增强验证时 Raw Slice 无法证明来源，
+部分 foreign non-class slice 也会返回 `DroppedUnpooled`。新状态追加为数值 8，旧状态
+数值均不改变。仅在启用可选 counters 时，`Stats.DroppedUnpooled` 才累计此结果。
 
 在 Fast 模式下，`Retained` 只表示 best-effort runtime pool 接受了该值；runtime 随时可以丢弃它。
 

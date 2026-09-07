@@ -74,7 +74,10 @@ func (p *Pool) ReleaseSlice(buffer []byte) ReleaseStatus {
 	}
 	class := p.classForCapacity(capacity)
 	if class < 0 {
-		return p.recordRelease(DroppedInvalid, -1)
+		if capacity == 0 {
+			return p.recordRelease(DroppedInvalid, -1)
+		}
+		return p.recordRelease(DroppedUnpooled, -1)
 	}
 
 	storage := p.rawWrapper()

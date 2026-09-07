@@ -14,6 +14,8 @@ const (
 	RejectedForeign
 	RejectedDuplicate
 	IgnoredNil
+	// DroppedUnpooled is valid storage within the pooling cutoff that has no Capacity Class.
+	DroppedUnpooled
 )
 
 var releaseStatusNames = [...]string{
@@ -25,6 +27,7 @@ var releaseStatusNames = [...]string{
 	"RejectedForeign",
 	"RejectedDuplicate",
 	"IgnoredNil",
+	"DroppedUnpooled",
 }
 
 // String returns the stable name of status.

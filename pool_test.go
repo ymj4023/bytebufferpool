@@ -121,8 +121,8 @@ func TestPoolDistinguishesInvalidSizesAndUnpooledStorage(t *testing.T) {
 	})
 
 	classGap := pool.Acquire(200)
-	if got := classGap.Release(); got != bytebufferpool.DroppedInvalid {
-		t.Fatalf("Release 200-byte class gap = %v; want DroppedInvalid", got)
+	if got := classGap.Release(); got != bytebufferpool.DroppedUnpooled {
+		t.Fatalf("Release 200-byte class gap = %v; want DroppedUnpooled", got)
 	}
 
 	oversize := pool.Acquire(300)

@@ -227,7 +227,7 @@ func TestRawSliceRecordsZeroOversizeAndInvalidOperations(t *testing.T) {
 	if got := pool.ReleaseSlice(oversize); got != bytebufferpool.DroppedOversize {
 		t.Fatalf("oversize ReleaseSlice() = %v; want DroppedOversize", got)
 	}
-	if got := pool.ReleaseSlice(make([]byte, 32)); got != bytebufferpool.DroppedInvalid {
+	if got := pool.ReleaseSlice(make([]byte, 0)); got != bytebufferpool.DroppedInvalid {
 		t.Fatalf("invalid ReleaseSlice() = %v; want DroppedInvalid", got)
 	}
 

@@ -63,3 +63,18 @@ func ExamplePool_bounded() {
 	// DroppedFull
 	// 1 64
 }
+
+func ExamplePool_unpooled() {
+	config := bytebufferpool.DefaultConfig(bytebufferpool.Fast)
+	config.Classes = []int{64}
+	config.MaxPooledCapacity = 128
+	pool, _ := bytebufferpool.New(config)
+	gap := pool.Acquire(100)
+	oversize := pool.Acquire(129)
+	fmt.Println(gap.Release())
+	fmt.Println(oversize.Release())
+
+	// Output:
+	// DroppedUnpooled
+	// DroppedOversize
+}

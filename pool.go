@@ -198,7 +198,7 @@ func (p *Pool) release(storage *backingStorage, leaseGeneration uint64) ReleaseS
 		return p.recordRelease(DroppedOversize, class)
 	}
 	if class < 0 {
-		return p.recordRelease(DroppedInvalid, class)
+		return p.recordRelease(DroppedUnpooled, class)
 	}
 	if class >= len(p.sizes) || cap(storage.buf) != p.sizes[class] {
 		return p.recordRelease(DroppedInvalid, class)

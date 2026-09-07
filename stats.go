@@ -44,6 +44,7 @@ type Stats struct {
 	DroppedFull       uint64
 	DroppedOversize   uint64
 	DroppedInvalid    uint64
+	DroppedUnpooled   uint64
 	DroppedStale      uint64
 	RejectedForeign   uint64
 	RejectedDuplicate uint64
@@ -68,6 +69,7 @@ type poolCounters struct {
 	droppedFull       atomic.Uint64
 	droppedOversize   atomic.Uint64
 	droppedInvalid    atomic.Uint64
+	droppedUnpooled   atomic.Uint64
 	droppedStale      atomic.Uint64
 	rejectedForeign   atomic.Uint64
 	rejectedDuplicate atomic.Uint64
@@ -128,6 +130,7 @@ func (p *Pool) Stats() Stats {
 	stats.DroppedFull = counters.droppedFull.Load()
 	stats.DroppedOversize = counters.droppedOversize.Load()
 	stats.DroppedInvalid = counters.droppedInvalid.Load()
+	stats.DroppedUnpooled = counters.droppedUnpooled.Load()
 	stats.DroppedStale = counters.droppedStale.Load()
 	stats.RejectedForeign = counters.rejectedForeign.Load()
 	stats.RejectedDuplicate = counters.rejectedDuplicate.Load()
@@ -182,6 +185,8 @@ func (p *Pool) recordRelease(status ReleaseStatus, class int) ReleaseStatus {
 		p.counters.droppedOversize.Add(1)
 	case DroppedInvalid:
 		p.counters.droppedInvalid.Add(1)
+	case DroppedUnpooled:
+		p.counters.droppedUnpooled.Add(1)
 	case DroppedStale:
 		p.counters.droppedStale.Add(1)
 	case RejectedForeign:

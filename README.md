@@ -138,6 +138,15 @@ Release reports one of:
 - `RejectedForeign`
 - `RejectedDuplicate`
 - `IgnoredNil`
+- `DroppedUnpooled`
+
+`DroppedUnpooled` means valid storage at or below `MaxPooledCapacity` has no
+matching Capacity Class; above that cutoff the result remains `DroppedOversize`.
+Malformed or validated changed-capacity storage remains `DroppedInvalid`.
+Ownership failures take precedence. Without enhanced validation, Raw Slice cannot
+prove provenance: some foreign non-class slices also receive `DroppedUnpooled`.
+The new status is appended as value 8; all existing status numbers are unchanged.
+`Stats.DroppedUnpooled` counts it only when optional counters are enabled.
 
 In Fast mode, `Retained` means accepted by a best-effort runtime pool; the runtime may discard the value at any time.
 
