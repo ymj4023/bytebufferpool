@@ -2,7 +2,16 @@ package bytebufferpool
 
 import "sync/atomic"
 
+// ClassInventory reports exact idle Backing Storage for one Bounded Capacity Class.
+// RetainedCapacity excludes allocator overhead, Go heap, and process RSS.
+type ClassInventory struct {
+	Capacity         int
+	IdleStorageCount int64
+	RetainedCapacity int64
+}
+
 // ClassStats reports optional operation counters for one Capacity Class.
+// Counters are loaded independently, not as one transactional snapshot.
 type ClassStats struct {
 	Capacity int
 	Hits     uint64
@@ -11,11 +20,16 @@ type ClassStats struct {
 	Dropped  uint64
 }
 
-// Stats is a point-in-time view of Pool inventory and optional operations.
+// Stats reports Pool inventory and optional operation history.
+// ClassInventory and global retained totals form one exact Bounded snapshot.
+// Validation Inventory is sampled separately under its own lock. Optional
+// operation counters are independent loads, not a transactional snapshot.
 type Stats struct {
+	Generation              uint64
 	RetainedAvailable       bool
 	RetainedStorageCount    int64
 	RetainedCapacity        int64
+	ClassInventory          []ClassInventory
 	ValidationAvailable     bool
 	ActiveRawSlices         int64
 	ValidationTombstones    int64
@@ -70,17 +84,21 @@ func newPoolCounters(capacities []int) *poolCounters {
 	}
 }
 
-// Stats returns a point-in-time view of Pool inventory and operations.
+// Stats reports inventory and operations. Generation identifies the captured
+// Pool epoch and is available in both modes, independently of optional counters.
+// A concurrent Clear may advance the Pool after that epoch has been captured.
 func (p *Pool) Stats() Stats {
-	stats := Stats{}
+	generation := p.current.Load()
+	stats := Stats{Generation: generation.id}
 	if p.config.Mode == Bounded {
-		generation := p.current.Load()
 		for _, class := range generation.boundedClasses {
 			class.mu.Lock()
 		}
 		stats.RetainedAvailable = true
-		for _, class := range generation.boundedClasses {
+		stats.ClassInventory = make([]ClassInventory, len(generation.boundedClasses))
+		for i, class := range generation.boundedClasses {
 			count := int64(len(class.idle))
+			stats.ClassInventory[i] = ClassInventory{Capacity: class.size, IdleStorageCount: count, RetainedCapacity: count * int64(class.size)}
 			stats.RetainedStorageCount += count
 			stats.RetainedCapacity += count * int64(class.size)
 		}

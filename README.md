@@ -115,6 +115,17 @@ config.StatsEnabled = true
 - Optional counters report acquire, hit, miss, Release outcomes, validation rejection, zeroed bytes, and per-class activity.
 - Bounded inventory remains available when optional counters are disabled because it is required to enforce the budget.
 
+`Stats.Generation` starts at zero and advances once per `Clear`, in both modes
+and with counters disabled. In Bounded mode, `Stats.ClassInventory` contains
+`Capacity`, `IdleStorageCount`, and `RetainedCapacity` for every configured class;
+its totals reconcile exactly with the global retained inventory in that snapshot.
+Fast mode reports `RetainedAvailable=false` and no Class Inventory. These counts
+describe idle Backing Storage, not total Go heap or RSS. `Stats.Classes` remains
+the separate optional `ClassStats` operation history: counters are independently
+loaded and are not transactionally consistent with each other or inventory.
+Validation Inventory is sampled separately; a concurrent Clear may advance the
+Pool after Stats captures its Generation.
+
 ## ReleaseStatus
 
 Release reports one of:

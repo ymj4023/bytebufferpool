@@ -115,6 +115,14 @@ config.StatsEnabled = true
 - 可选 counters 记录 acquire、hit、miss、Release 结果、验证拒绝、清零字节数和每级活动。
 - 即使关闭可选 counters，Bounded inventory 仍然可用，因为它是执行预算所必需的状态。
 
+`Stats.Generation` 从零开始，每次 `Clear` 增加一次，两种模式及关闭 counters 时均可用。
+Bounded 模式的 `Stats.ClassInventory` 为每个配置的 class 提供 `Capacity`、
+`IdleStorageCount` 和 `RetainedCapacity`，其合计与同一快照的全局保留库存精确一致。
+Fast 模式返回 `RetainedAvailable=false`，不提供 Class Inventory。这些值描述空闲
+Backing Storage，而非总 Go heap 或 RSS。`Stats.Classes` 仍是独立的可选 `ClassStats`
+操作历史：各 counter 独立读取，不保证彼此之间或与库存之间的事务一致性。
+Validation Inventory 单独采样；并发 Clear 可能在 Stats 捕获 Generation 后推进 Pool。
+
 ## ReleaseStatus
 
 Release 会返回以下状态之一：
