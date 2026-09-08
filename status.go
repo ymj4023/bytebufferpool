@@ -6,6 +6,8 @@ import "strconv"
 type ReleaseStatus uint8
 
 const (
+	// Retained means accepted for reuse. In Fast mode it is best-effort:
+	// the runtime or a concurrent Clear may immediately discard the value.
 	Retained ReleaseStatus = iota
 	DroppedFull
 	DroppedOversize

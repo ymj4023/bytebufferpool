@@ -18,6 +18,8 @@
 
 库模块没有第三方运行时依赖，支持 Go 1.22 及以上版本。
 
+Pool 首次使用后不得复制。需要共享时传递其指针，不要复制 Pool 值。
+
 ## 安装
 
 ```text
@@ -143,7 +145,7 @@ Release 会返回以下状态之一：
 部分 foreign non-class slice 也会返回 `DroppedUnpooled`。新状态追加为数值 8，旧状态
 数值均不改变。仅在启用可选 counters 时，`Stats.DroppedUnpooled` 才累计此结果。
 
-在 Fast 模式下，`Retained` 只表示 best-effort runtime pool 接受了该值；runtime 随时可以丢弃它。
+在 Fast 模式下，`Retained` 只表示 best-effort runtime pool 接受了该值；runtime 随时可以丢弃它。并发 `Clear` 也可能立即使已接受的值不可达。接受不保证该值继续存活，也不保证后续 cache hit。
 
 ## Benchmark 结果
 

@@ -3,4 +3,7 @@
 // Pool offers Fast best-effort retention and Bounded exact Retained Capacity.
 // Lease is the default ownership boundary; Raw Slice is an explicitly weaker
 // alternative. Buffer provides append and standard I/O behavior on top of Lease.
+// A Pool must not be copied after first use. Fast Retained reports best-effort
+// acceptance, not survival across GC or concurrent Clear. Exact inventories in
+// Stats are distinct from independently loaded, non-transactional counters.
 package bytebufferpool

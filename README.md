@@ -18,6 +18,8 @@ It is a clean-room implementation with a new API. It is not a drop-in replacemen
 
 The library module has no third-party runtime dependencies and supports Go 1.22 or newer.
 
+A Pool must not be copied after first use. Share its pointer, not a copied value.
+
 ## Install
 
 ```text
@@ -148,7 +150,7 @@ prove provenance: some foreign non-class slices also receive `DroppedUnpooled`.
 The new status is appended as value 8; all existing status numbers are unchanged.
 `Stats.DroppedUnpooled` counts it only when optional counters are enabled.
 
-In Fast mode, `Retained` means accepted by a best-effort runtime pool; the runtime may discard the value at any time.
+In Fast mode, `Retained` means accepted by a best-effort runtime pool; the runtime may discard the value at any time. A concurrent `Clear` may make the accepted value unreachable immediately. Acceptance does not guarantee survival or a future cache hit.
 
 ## Benchmark results
 

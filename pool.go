@@ -32,6 +32,7 @@ type poolGeneration struct {
 }
 
 // Pool lends reusable byte storage under one immutable configuration.
+// A Pool must not be copied after first use.
 type Pool struct {
 	config                  Config
 	sizes                   []int
