@@ -154,6 +154,9 @@ In Fast mode, `Retained` means accepted by a best-effort runtime pool; the runti
 
 ## Benchmark results
 
+[v1.1 validation measurements](./benchmarks/results/2026-09-08-windows-amd64-go1.26.7/README.md)
+report bounded diagnostic-history overhead separately from the general workloads below.
+
 These are medians from Windows/amd64, Go 1.26.7, AMD Ryzen 9 8945HX. The two fixed-size tables use 10 samples with `-benchtime=1s -cpu=1,8`; the lifecycle table uses 10 samples with `-benchtime=20x -cpu=1,8`. The tables show the CPU=1 result and intentionally compare only the named workload.
 
 ### Raw requested-length API — 1 KiB

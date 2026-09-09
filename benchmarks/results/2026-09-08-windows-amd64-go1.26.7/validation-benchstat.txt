@@ -1,0 +1,69 @@
+goos: windows
+goarch: amd64
+pkg: github.com/ymj4023/bytebufferpool/benchmarks
+cpu: AMD Ryzen 9 8945HX with Radeon Graphics
+                                                 │ ../.tmp/v11-validation-benchmark.txt │
+                                                 │                sec/op                │
+ValidationHistory/mode=0/limit=0/batch=false                                62.09n ± 9%
+ValidationHistory/mode=0/limit=0/batch=true                                 19.64µ ± 5%
+ValidationHistory/mode=0/limit=1/batch=false                                127.8n ± 1%
+ValidationHistory/mode=0/limit=1/batch=true                                 46.31µ ± 1%
+ValidationHistory/mode=0/limit=16384/batch=false                            127.2n ± 1%
+ValidationHistory/mode=0/limit=16384/batch=true                             56.83µ ± 1%
+ValidationHistory/mode=1/limit=0/batch=false                                51.58n ± 1%
+ValidationHistory/mode=1/limit=0/batch=true                                 19.73µ ± 3%
+ValidationHistory/mode=1/limit=1/batch=false                                122.5n ± 1%
+ValidationHistory/mode=1/limit=1/batch=true                                 46.29µ ± 1%
+ValidationHistory/mode=1/limit=16384/batch=false                            122.7n ± 1%
+ValidationHistory/mode=1/limit=16384/batch=true                             56.74µ ± 1%
+geomean                                                                     1.891µ
+
+                                                 │ ../.tmp/v11-validation-benchmark.txt │
+                                                 │                 B/s                  │
+ValidationHistory/mode=0/limit=0/batch=false                              983.0Mi ± 10%
+ValidationHistory/mode=0/limit=0/batch=true                               403.9Mi ±  5%
+ValidationHistory/mode=0/limit=1/batch=false                              477.8Mi ±  1%
+ValidationHistory/mode=0/limit=1/batch=true                               171.3Mi ±  1%
+ValidationHistory/mode=0/limit=16384/batch=false                          480.0Mi ±  1%
+ValidationHistory/mode=0/limit=16384/batch=true                           139.6Mi ±  1%
+ValidationHistory/mode=1/limit=0/batch=false                              1.156Gi ±  1%
+ValidationHistory/mode=1/limit=0/batch=true                               402.1Mi ±  3%
+ValidationHistory/mode=1/limit=1/batch=false                              498.2Mi ±  1%
+ValidationHistory/mode=1/limit=1/batch=true                               171.4Mi ±  1%
+ValidationHistory/mode=1/limit=16384/batch=false                          497.5Mi ±  1%
+ValidationHistory/mode=1/limit=16384/batch=true                           139.8Mi ±  1%
+geomean                                                                   367.9Mi
+
+                                                 │ ../.tmp/v11-validation-benchmark.txt │
+                                                 │                 B/op                 │
+ValidationHistory/mode=0/limit=0/batch=false                               0.000 ± 0%
+ValidationHistory/mode=0/limit=0/batch=true                              19.14Ki ± 0%
+ValidationHistory/mode=0/limit=1/batch=false                               0.000 ± 0%
+ValidationHistory/mode=0/limit=1/batch=true                              19.19Ki ± 0%
+ValidationHistory/mode=0/limit=16384/batch=false                           0.000 ± 0%
+ValidationHistory/mode=0/limit=16384/batch=true                          18.97Ki ± 0%
+ValidationHistory/mode=1/limit=0/batch=false                               0.000 ± 0%
+ValidationHistory/mode=1/limit=0/batch=true                              19.12Ki ± 0%
+ValidationHistory/mode=1/limit=1/batch=false                               0.000 ± 0%
+ValidationHistory/mode=1/limit=1/batch=true                              19.23Ki ± 0%
+ValidationHistory/mode=1/limit=16384/batch=false                           0.000 ± 0%
+ValidationHistory/mode=1/limit=16384/batch=true                          18.96Ki ± 0%
+geomean                                                                               ¹
+¹ summaries must be >0 to compute geomean
+
+                                                 │ ../.tmp/v11-validation-benchmark.txt │
+                                                 │              allocs/op               │
+ValidationHistory/mode=0/limit=0/batch=false                               0.000 ± 0%
+ValidationHistory/mode=0/limit=0/batch=true                                256.0 ± 0%
+ValidationHistory/mode=0/limit=1/batch=false                               0.000 ± 0%
+ValidationHistory/mode=0/limit=1/batch=true                                256.0 ± 0%
+ValidationHistory/mode=0/limit=16384/batch=false                           0.000 ± 0%
+ValidationHistory/mode=0/limit=16384/batch=true                            256.0 ± 0%
+ValidationHistory/mode=1/limit=0/batch=false                               0.000 ± 0%
+ValidationHistory/mode=1/limit=0/batch=true                                256.0 ± 0%
+ValidationHistory/mode=1/limit=1/batch=false                               0.000 ± 0%
+ValidationHistory/mode=1/limit=1/batch=true                                256.0 ± 0%
+ValidationHistory/mode=1/limit=16384/batch=false                           0.000 ± 0%
+ValidationHistory/mode=1/limit=16384/batch=true                            256.0 ± 0%
+geomean                                                                               ¹
+¹ summaries must be >0 to compute geomean

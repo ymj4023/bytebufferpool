@@ -46,6 +46,10 @@ The committed [Issue #13 before/after evidence](./results/2026-09-02-windows-amd
 
 Record the complete Go version, GOOS/GOARCH, CPU, logical core count, GOMAXPROCS, GOGC, memory limit, project commit, and dependency versions beside every published result.
 
+The [v1.1 validation measurements](./results/2026-09-08-windows-amd64-go1.26.7/README.md)
+separate hot reuse from distinct-live-address batch churn and compare validation
+disabled, limit 1, and the default limit 16,384 in both modes.
+
 ## Isolated-process memory suite
 
 The [v1.1 validation-history evidence](./results/2026-09-06-windows-amd64-go1.26.7/validation/README.md)

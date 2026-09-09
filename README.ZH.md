@@ -149,6 +149,9 @@ Release 会返回以下状态之一：
 
 ## Benchmark 结果
 
+[v1.1 验证性能测量](./benchmarks/results/2026-09-08-windows-amd64-go1.26.7/README.md)
+单独报告有界诊断历史的开销，与下面的通用 workload 数据分开解读。
+
 以下数据来自 Windows/amd64、Go 1.26.7、AMD Ryzen 9 8945HX。两个固定尺寸表使用 10 个样本和 `-benchtime=1s -cpu=1,8`；生命周期表使用 10 个样本和 `-benchtime=20x -cpu=1,8`。下表展示 CPU=1 的结果，并且只比较表中明确列出的 workload。
 
 ### Raw requested-length API — 1 KiB
